@@ -69,7 +69,7 @@ export default class UserRepositoryImpl implements IUserRepo {
         const user: UserProps = await this.conn
             .update(props)
             .from('users')
-            .where('id_user', props.id);
+            .where('id_user', props.id_user);
 
         return user;
     }
@@ -78,6 +78,6 @@ export default class UserRepositoryImpl implements IUserRepo {
         return await this.conn
             .delete()
             .from('users')
-            .where('id_user', props.id);
+            .where('id_user', props.id_user);
     }
 }

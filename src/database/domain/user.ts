@@ -1,5 +1,5 @@
 export default interface UserProps {
-    id?: number | null;
+    id_user?: number | null;
     nome?: string;
     cpf_cnpj?: string;
     email?: string;
