@@ -21,7 +21,7 @@ export default class LojistaRepositoryImpl implements ILojistaRepo {
             .select()
             .limit((limit * page))
             .offset((limit * page) - limit)
-            .orderBy('id_user', 'asc')
+            .orderBy('lojistas.id_user', 'asc')
             .from('users')
             .innerJoin('lojistas', 'users.id_user', 'lojistas.id_user');
     }
