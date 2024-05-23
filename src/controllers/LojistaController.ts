@@ -14,6 +14,8 @@ import CreateLojista from "../usecases/CreateLojista.js";
 
 import sendResponse from "../utils/response.js";
 import UserProps from "../database/domain/user.js";
+import { UserNotFoundError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
+import { LojistaMissingDataError, LojistaNotFoundError } from '../errors/Lojista.js';
 
 dotenv.config();
 
@@ -51,24 +53,28 @@ export default class UserController extends Controller {
 
         const { nome, email, senha, cpf_cnpj, tipo_pessoa } = req.body;
 
-        const userData: UserProps = await createUser.execute({ nome, email, senha, cpf_cnpj, tipo_pessoa })
-            .then(async ({ data }) => data)
-            .catch(err => sendResponse(req, res, 500, [], err.message, err));
+        let id_user = 0;
 
-        const id_user = userData.id_user ?? 0;
-        const createLojista = new CreateLojista(this.repository);
-        return await createLojista.execute({ id_user })
-            .then(({ data, message }) => {
-                console.log('5: ', data)
-                const lojistaWithHateoas = {
-                    ...data, links: [
-                        { rel: 'info', href: process.env.API_ADDRESS + '/user/' + id_user, method: 'GET' },
-                    ]
-                }
+        try {
+            await createUser.execute({ nome, email, senha, cpf_cnpj, tipo_pessoa })
+                .then(async ({ data }) => data.id_user)
+                .catch(err => { throw err });
 
-                return sendResponse(req, res, 202, lojistaWithHateoas, message)
-            })
-            .catch(err => sendResponse(req, res, 500, [], err.message, err))
+            const createLojista = new CreateLojista(this.repository);
+            return await createLojista.execute({ id_user })
+                .then(({ data, message }) => {
+                    const lojistaWithHateoas = {
+                        ...data, links: [
+                            { rel: 'info', href: process.env.API_ADDRESS + '/user/' + id_user, method: 'GET' },
+                        ]
+                    }
+
+                    return sendResponse(req, res, 202, lojistaWithHateoas, message)
+                })
+                .catch(err => { throw err })
+        } catch (err: any | Error | UserNotFoundError | UserIncorrectPatternError | UserMissingDataError | LojistaMissingDataError | LojistaNotFoundError) {
+            return sendResponse(req, res, 500, [], err.message ?? '', err);
+        }
     }
 
     public async show(req: Request, res: Response): Promise<Response> {
