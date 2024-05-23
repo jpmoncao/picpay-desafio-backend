@@ -1,29 +1,14 @@
 # Desafio Back-end PicPay
 
-Primeiramente, obrigado pelo seu interesse em trabalhar na melhor plataforma de pagamentos do mundo!
-Abaixo você encontrará todos as informações necessárias para iniciar o seu teste.
+Estou fazendo esse projeto como conteúdo de estudo e portfólio.
 
 ## Avisos antes de começar
 
 - Leia com atenção este documento todo e tente seguir ao **máximo** as instruções;
 - Crie um repositório no seu GitHub **sem citar nada relacionado ao PicPay**;
 - Faça seus commits no seu repositório;
-- Envie o link do seu repositório para o email **do recrutador responsável**;
-- Você poderá consultar o Google, Stackoverflow ou algum projeto particular na sua máquina;
 - Dê uma olhada nos [Materiais úteis](#materiais-úteis);
 - Dê uma olhada em como será a [entrevista](#para-o-dia-da-entrevista-técnica);
-- Fique à vontade para perguntar qualquer dúvida aos recrutadores;
-- Fique tranquilo, respire, assim como você, também já passamos por essa etapa. Boa sorte! :)
-
-_Corpo do Email com o link do repositório do desafio_
-
-> Seu Nome
->
-> Nome do recrutador
->
-> Link do repositório
->
-> Link do Linkedin
 
 ### Sobre o ambiente da aplicação:
 
@@ -38,13 +23,6 @@ _Corpo do Email com o link do repositório do desafio_
   resolver problemas;
 
 > Valorizamos uma boa estrutura de containeres criada por você.
-
-## Para o dia da entrevista técnica
-
-Na data marcada pelo recrutador tenha sua aplicação rodando na sua máquina local para execução dos testes e para nos
-mostrar os pontos desenvolvidos e possíveis questionamentos.
-Faremos um code review junto contigo como se você já fosse do nosso time :heart:, você poderá explicar o que você
-pensou, como arquitetou e como pode evoluir o projeto.
 
 ## Objetivo: PicPay Simplificado
 
