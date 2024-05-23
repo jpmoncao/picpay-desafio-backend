@@ -43,6 +43,7 @@ export default class CreateUser {
 
         const userId = await this.repository.createUser({ nome, email, senha, cpf_cnpj, tipo_pessoa });
         const data = await this.repository.findUserById(Number(userId));
+        console.log('3: ', data);
 
         return {
             data,

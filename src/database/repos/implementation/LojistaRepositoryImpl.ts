@@ -10,7 +10,7 @@ export default class LojistaRepositoryImpl implements ILojistaRepo {
         this.conn = createConn();
     }
 
-    public async findUsers(page: number, limit: number): Promise<LojistaProps[] | undefined> {
+    public async findLojistas(page: number, limit: number): Promise<LojistaProps[] | undefined> {
         if (page < 1)
             page = 1;
 
@@ -26,43 +26,43 @@ export default class LojistaRepositoryImpl implements ILojistaRepo {
             .innerJoin('lojistas', 'users.id_user', 'lojistas.id_user');
     }
 
-    public async findUserById(userId: number): Promise<LojistaProps | undefined> {
+    public async findLojistaById(userId: number): Promise<LojistaProps | undefined> {
         const user: LojistaProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('lojistas.id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
             .from('users')
             .innerJoin('lojistas', 'users.id_user', 'lojistas.id_user')
-            .where('id_user', userId);
+            .where('lojistas.id_user', userId);
         return user[0];
     }
 
-    public async findUserByCPF(cpf: string): Promise<LojistaProps | undefined> {
+    public async findLojistaByCPF(cpf: string): Promise<LojistaProps | undefined> {
         const user: LojistaProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('lojistas.id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
             .from('users')
             .innerJoin('lojistas', 'users.id_user', 'lojistas.id_user')
             .where('cpf_cnpj', cpf);
         return user[0];
     }
 
-    public async findUserByCNPJ(cnpj: string): Promise<LojistaProps | undefined> {
+    public async findLojistaByCNPJ(cnpj: string): Promise<LojistaProps | undefined> {
         const user: LojistaProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('lojistas.id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
             .from('users')
             .innerJoin('lojistas', 'users.id_user', 'lojistas.id_user')
             .where('cpf_cnpj', cnpj);
         return user[0];
     }
 
-    public async findUserByEmail(email: string): Promise<LojistaProps | undefined> {
+    public async findLojistaByEmail(email: string): Promise<LojistaProps | undefined> {
         const user: LojistaProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('lojistas.id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
             .from('users')
             .innerJoin('lojistas', 'users.id_user', 'lojistas.id_user')
             .where('email', email);
         return user[0];
     }
 
-    public async createUser(props: LojistaProps): Promise<LojistaProps | undefined> {
+    public async createLojista(props: LojistaProps): Promise<LojistaProps | undefined> {
         const lojistaId: LojistaProps = await this.conn
             .insert(props)
             .into('lojistas');
