@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 
 import UserRouter from './router/UserRouter.js';
+import LojistaRouter from './router/LojistaRouter.js';
 
 dotenv.config();
 const app = express();
@@ -9,6 +10,7 @@ const app = express();
 app.use(express.json());
 
 app.use('/user', new UserRouter().router);
+app.use('/lojista', new LojistaRouter().router);
 
 app.use('/', (req, res) => {
     res.status(202).json({
