@@ -9,10 +9,10 @@ export default class ListLojistaById {
         this.repository = repository;
     }
 
-    async execute(id: number): Promise<UseCase> {
+    async execute(id: number, throwErr: boolean = true): Promise<UseCase> {
         const data = await this.repository.findLojistaById(id);
 
-        if (data == undefined)
+        if (data == undefined && throwErr)
             throw new LojistaNotFoundError(`Nenhum lojista foi encontrado com esse id! (ID: ${id})`)
 
         return {

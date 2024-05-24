@@ -23,3 +23,16 @@ export class LojistaMissingDataError extends Error {
         this.code = 'LOJISTA_HAS_MISSING_DATA'
     }
 }
+
+export class LojistaAlreadyExistsError extends Error {
+    name: string;
+    message: string;
+    code: string;
+
+    constructor(message: string) {
+        super(message);
+
+        this.name = 'LojistaAlreadyExistsError';
+        this.code = 'LOJISTA_ALREADY_EXISTS';
+    }
+}
