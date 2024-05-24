@@ -56,7 +56,7 @@ export default class UserController extends Controller {
         let id_user = 0;
 
         try {
-            await createUser.execute({ nome, email, senha, cpf_cnpj, tipo_pessoa })
+            id_user = await createUser.execute({ nome, email, senha, cpf_cnpj, tipo_pessoa })
                 .then(async ({ data }) => data.id_user)
                 .catch(err => { throw err });
 
