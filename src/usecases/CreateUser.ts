@@ -3,7 +3,7 @@ import UserProps from "../database/domain/user.js";
 import UseCase from "../types/UseCase.js";
 import { validarCPF, validarCNPJ } from "../utils/validate.js";
 
-import { UserDuplicateUsernameError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
+import { UserDuplicateCNPJError, UserDuplicateCPFError, UserDuplicateEmailError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
 
 export default class CreateUser {
     repository: IUserRepo;
@@ -28,13 +28,16 @@ export default class CreateUser {
         else if (tipo_pessoa === 'J')
             usernameAlreadyExits = await this.repository.findUserByCNPJ(cpf_cnpj ?? '');
 
-        if (usernameAlreadyExits !== undefined)
-            throw new UserDuplicateUsernameError(`O ${tipo_pessoa === 'F' ? 'CPF' : 'CNPJ'} '${cpf_cnpj}' já está sendo usado por outro usuário!`);
+        if (usernameAlreadyExits !== undefined) {
+            if (tipo_pessoa === 'F')
+                throw new UserDuplicateCPFError(`O CPF '${cpf_cnpj}' já está sendo usado por outro usuário!`);
+            else if (tipo_pessoa === 'J')
+                throw new UserDuplicateCNPJError(`O CNPJ '${cpf_cnpj}' já está sendo usado por outro usuário!`);
+        }
 
         usernameAlreadyExits = await this.repository.findUserByEmail(email);
-
         if (usernameAlreadyExits !== undefined)
-            throw new UserDuplicateUsernameError(`O e-mail inserido já está sendo usado por outro usuário!`);
+            throw new UserDuplicateEmailError(`O e-mail inserido já está sendo usado por outro usuário!`);
 
         if (tipo_pessoa === 'F' && !validarCPF(cpf_cnpj))
             throw new UserIncorrectPatternError(`O CPF não é válido!`);
@@ -43,7 +46,6 @@ export default class CreateUser {
 
         const userId = await this.repository.createUser({ nome, email, senha, cpf_cnpj, tipo_pessoa });
         const data = await this.repository.findUserById(Number(userId));
-        console.log('3: ', data);
 
         return {
             data,

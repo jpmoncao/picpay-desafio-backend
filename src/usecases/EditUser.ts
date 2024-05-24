@@ -3,7 +3,7 @@ import UserProps from "../database/domain/user.js";
 import UseCase from "../types/UseCase.js";
 import { validarCPF, validarCNPJ } from "../utils/validate.js";
 
-import { UserDuplicateUsernameError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
+import { UserDuplicateCNPJError, UserDuplicateCPFError, UserDuplicateEmailError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
 
 export default class EditUser {
     repository: IUserRepo;
@@ -34,12 +34,15 @@ export default class EditUser {
             usernameAlreadyInUse = await this.repository.findUserByCNPJ(cpf_cnpj ?? '');
 
         if (usernameAlreadyInUse !== undefined && usernameAlreadyInUse.id !== id_user)
-            throw new UserDuplicateUsernameError(`O ${tipo_pessoa === 'F' ? 'CPF' : 'CNPJ'} '${cpf_cnpj}' já está sendo usado por outro usuário!`);
+            if (tipo_pessoa === 'F')
+                throw new UserDuplicateCPFError(`O CPF '${cpf_cnpj}' já está sendo usado por outro usuário!`);
+            else if (tipo_pessoa === 'J')
+                throw new UserDuplicateCNPJError(`O CNPJ '${cpf_cnpj}' já está sendo usado por outro usuário!`);
 
         usernameAlreadyInUse = await this.repository.findUserByEmail(email ?? '');
 
         if (usernameAlreadyInUse !== undefined && usernameAlreadyInUse.id !== id_user)
-            throw new UserDuplicateUsernameError(`O e-mail inserido já está sendo usado por outro usuário!`);
+            throw new UserDuplicateEmailError(`O e-mail inserido já está sendo usado por outro usuário!`);
 
         if (tipo_pessoa === 'F' && !validarCPF(cpf_cnpj ?? ''))
             throw new UserIncorrectPatternError(`O CPF não é válido!`);
