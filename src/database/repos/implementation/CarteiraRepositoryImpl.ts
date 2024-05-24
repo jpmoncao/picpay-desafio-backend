@@ -13,7 +13,7 @@ export default class CarteiraRepositoryImpl implements ICarteiraRepo {
     public async createCarteira(props: CarteiraProps): Promise<CarteiraProps | undefined> {
         const carteira: CarteiraProps = await this.conn
             .insert(props)
-            .into('carteira')
+            .into('carteiras')
 
         return carteira[0];
     }
@@ -23,7 +23,7 @@ export default class CarteiraRepositoryImpl implements ICarteiraRepo {
 
         const carteira: CarteiraProps = await this.conn
             .update({ saldo })
-            .from('carteira')
+            .from('carteiras')
             .where(!id_carteira ? 'id_user' : 'id_carteira',
                 !id_carteira ? id_user : id_carteira);
 
@@ -35,7 +35,7 @@ export default class CarteiraRepositoryImpl implements ICarteiraRepo {
 
         const carteira: CarteiraProps = await this.conn
             .update({ lojista })
-            .from('carteira')
+            .from('carteiras')
             .where(!id_carteira ? 'id_user' : 'id_carteira',
                 !id_carteira ? id_user : id_carteira);
 
@@ -45,7 +45,7 @@ export default class CarteiraRepositoryImpl implements ICarteiraRepo {
     public async findCarteiraById(carteiraId: number): Promise<CarteiraProps | undefined> {
         const carteira: CarteiraProps[] = await this.conn
             .select('carteira.id_user', 'users.nome', 'users.cpf_cnpj', 'users.tipo_pessoa', 'carteira.saldo', 'carteira.lojista')
-            .from('carteira')
+            .from('carteiras')
             .innerJoin('users', 'carteira.id_user', 'users.id_user')
             .where('carteira.id_carteira', carteiraId);
         return carteira[0];
@@ -55,7 +55,7 @@ export default class CarteiraRepositoryImpl implements ICarteiraRepo {
     public async findCarteiraByUserId(userId: number): Promise<CarteiraProps | undefined> {
         const carteira: CarteiraProps[] = await this.conn
             .select('carteira.id_user', 'users.nome', 'users.cpf_cnpj', 'users.tipo_pessoa', 'carteira.saldo', 'carteira.lojista')
-            .from('carteira')
+            .from('carteiras')
             .innerJoin('users', 'carteira.id_user', 'users.id_user')
             .where('carteira.id_user', userId);
         return carteira[0];
