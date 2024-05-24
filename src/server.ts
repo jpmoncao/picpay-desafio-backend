@@ -3,6 +3,7 @@ import express from 'express';
 
 import UserRouter from './router/UserRouter.js';
 import LojistaRouter from './router/LojistaRouter.js';
+import CarteiraRouter from './router/CarteiraRouter.js';
 
 dotenv.config();
 const app = express();
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.use('/user', new UserRouter().router);
 app.use('/lojista', new LojistaRouter().router);
+app.use('/carteira', new CarteiraRouter().router);
 
 app.use('/', (req, res) => {
     res.status(202).json({
