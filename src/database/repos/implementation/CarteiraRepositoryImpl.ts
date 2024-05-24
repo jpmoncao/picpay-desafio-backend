@@ -18,20 +18,33 @@ export default class CarteiraRepositoryImpl implements ICarteiraRepo {
         return carteira[0];
     }
 
-    public async editBalanceCarteira(props: CarteiraProps): Promise<CarteiraProps | undefined> {
-        const { id_user, id_carteira, saldo } = props;
+    public async updateBalanceCarteira(props: CarteiraProps): Promise<CarteiraProps | undefined> {
+        const { id_user, id_carteira, saldo, lojista } = props;
 
         const carteira: CarteiraProps = await this.conn
-            .update(saldo)
+            .update({ saldo })
             .from('carteira')
-            .where(!id_carteira ? 'id_user' : 'id_carteira', id_carteira ?? id_user);
+            .where(!id_carteira ? 'id_user' : 'id_carteira',
+                !id_carteira ? id_user : id_carteira);
+
+        return carteira[0];
+    }
+
+    public async updateTypeCarteira(props: CarteiraProps): Promise<CarteiraProps | undefined> {
+        const { id_user, id_carteira, saldo, lojista } = props;
+
+        const carteira: CarteiraProps = await this.conn
+            .update({ lojista })
+            .from('carteira')
+            .where(!id_carteira ? 'id_user' : 'id_carteira',
+                !id_carteira ? id_user : id_carteira);
 
         return carteira[0];
     }
 
     public async findCarteiraById(carteiraId: number): Promise<CarteiraProps | undefined> {
         const carteira: CarteiraProps[] = await this.conn
-            .select('carteira.id_user', 'users.nome', 'users.cpf_cnpj', 'users.tipo_pessoa', 'users.email')
+            .select('carteira.id_user', 'users.nome', 'users.cpf_cnpj', 'users.tipo_pessoa', 'carteira.saldo', 'carteira.lojista')
             .from('carteira')
             .innerJoin('users', 'carteira.id_user', 'users.id_user')
             .where('carteira.id_carteira', carteiraId);
@@ -41,7 +54,7 @@ export default class CarteiraRepositoryImpl implements ICarteiraRepo {
 
     public async findCarteiraByUserId(userId: number): Promise<CarteiraProps | undefined> {
         const carteira: CarteiraProps[] = await this.conn
-            .select('carteira.id_user', 'users.nome', 'users.cpf_cnpj', 'users.tipo_pessoa', 'users.email')
+            .select('carteira.id_user', 'users.nome', 'users.cpf_cnpj', 'users.tipo_pessoa', 'carteira.saldo', 'carteira.lojista')
             .from('carteira')
             .innerJoin('users', 'carteira.id_user', 'users.id_user')
             .where('carteira.id_user', userId);
