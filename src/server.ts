@@ -4,6 +4,7 @@ import express from 'express';
 import UserRouter from './router/UserRouter.js';
 import ShopkeeperRouter from './router/ShopkeeperRouter.js';
 import WalletRouter from './router/WalletRouter.js';
+import TransferRouter from './router/TransferRouter.js';
 
 dotenv.config();
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use('/user', new UserRouter().router);
 app.use('/shopkeeper', new ShopkeeperRouter().router);
 app.use('/wallet', new WalletRouter().router);
+app.use('/transfer', new TransferRouter().router);
 
 app.use('/', (req, res) => {
     res.status(202).json({
