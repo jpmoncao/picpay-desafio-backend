@@ -1,133 +1,143 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */
-;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */
-;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */
-;
-/*!40101 SET NAMES utf8mb4 */
-;
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
 --
 -- Banco de dados: `banco`
 --
+
 -- --------------------------------------------------------
+
 --
--- Estrutura para tabela `carteiras`
+-- Estrutura para tabela `shopkeepers`
 --
-CREATE TABLE `carteiras` (
-  `id_carteira` int(10) UNSIGNED NOT NULL,
-  `id_user` int(10) UNSIGNED NOT NULL,
-  `saldo` decimal(15, 2) NOT NULL DEFAULT 0.00,
-  `lojista` varchar(1) NOT NULL DEFAULT 'N'
-) ENGINE = InnoDB DEFAULT CHARSET = latin1 COLLATE = latin1_bin;
--- --------------------------------------------------------
---
--- Estrutura para tabela `lojistas`
---
-CREATE TABLE `lojistas` (
-  `id_lojista` int(10) UNSIGNED NOT NULL,
+
+CREATE TABLE `shopkeepers` (
+  `id_shopkeeper` int(10) UNSIGNED NOT NULL,
   `id_user` int(10) UNSIGNED NOT NULL
-) ENGINE = InnoDB DEFAULT CHARSET = latin1 COLLATE = latin1_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_bin;
+
 -- --------------------------------------------------------
+
 --
--- Estrutura para tabela `transferencia`
+-- Estrutura para tabela `transfers`
 --
-CREATE TABLE `transferencia` (
-  `id_transferencia` int(10) UNSIGNED NOT NULL,
-  `id_user` int(10) UNSIGNED NOT NULL,
-  `id_destinatario` int(10) UNSIGNED NOT NULL,
-  `valor` decimal(15, 2) NOT NULL,
-  `entrada_saida` varchar(1) NOT NULL
-) ENGINE = InnoDB DEFAULT CHARSET = latin1 COLLATE = latin1_bin;
+
+CREATE TABLE `transfers` (
+  `id_transfer` int(10) UNSIGNED NOT NULL,
+  `id_payer` int(10) UNSIGNED NOT NULL,
+  `id_payee` int(10) UNSIGNED NOT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_bin;
+
 -- --------------------------------------------------------
+
 --
 -- Estrutura para tabela `users`
 --
+
 CREATE TABLE `users` (
   `id_user` int(10) UNSIGNED NOT NULL,
-  `nome` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `cpf_cnpj` varchar(14) NOT NULL,
   `email` varchar(255) NOT NULL,
-  `senha` varchar(255) NOT NULL,
-  `tipo_pessoa` varchar(1) NOT NULL DEFAULT 'F'
-) ENGINE = InnoDB DEFAULT CHARSET = latin1 COLLATE = latin1_bin;
+  `password` varchar(255) NOT NULL,
+  `person_type` varchar(1) NOT NULL DEFAULT 'F',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `wallets`
+--
+
+CREATE TABLE `wallets` (
+  `id_wallet` int(10) UNSIGNED NOT NULL,
+  `id_user` int(10) UNSIGNED NOT NULL,
+  `balance` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `shopkeeper` varchar(1) NOT NULL DEFAULT 'N'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_bin;
+
 --
 -- Índices para tabelas despejadas
 --
+
 --
--- Índices de tabela `carteiras`
+-- Índices de tabela `shopkeepers`
 --
-ALTER TABLE `carteiras`
-ADD PRIMARY KEY (`id_carteira`),
-  ADD KEY `carteiras_id_user_foreign` (`id_user`);
+ALTER TABLE `shopkeepers`
+  ADD PRIMARY KEY (`id_shopkeeper`),
+  ADD KEY `shopkeepers_id_user_foreign` (`id_user`);
+
 --
--- Índices de tabela `lojistas`
+-- Índices de tabela `transfers`
 --
-ALTER TABLE `lojistas`
-ADD PRIMARY KEY (`id_lojista`),
-  ADD KEY `lojistas_id_user_foreign` (`id_user`);
---
--- Índices de tabela `transferencia`
---
-ALTER TABLE `transferencia`
-ADD PRIMARY KEY (`id_transferencia`),
-  ADD KEY `transferencia_id_user_foreign` (`id_user`),
-  ADD KEY `transferencia_id_destinatario_foreign` (`id_destinatario`);
+ALTER TABLE `transfers`
+  ADD PRIMARY KEY (`id_transfer`),
+  ADD KEY `transfers_id_payer_foreign` (`id_payer`),
+  ADD KEY `transfers_id_payee_foreign` (`id_payee`);
+
 --
 -- Índices de tabela `users`
 --
 ALTER TABLE `users`
-ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `users_cpf_cnpj_unique` (`cpf_cnpj`),
-  ADD UNIQUE KEY `users_email_unique` (`email`);
+  ADD PRIMARY KEY (`id_user`);
+
+--
+-- Índices de tabela `wallets`
+--
+ALTER TABLE `wallets`
+  ADD PRIMARY KEY (`id_wallet`),
+  ADD KEY `wallets_id_user_foreign` (`id_user`);
+
 --
 -- AUTO_INCREMENT para tabelas despejadas
 --
+
 --
--- AUTO_INCREMENT de tabela `carteiras`
+-- AUTO_INCREMENT de tabela `transfers`
 --
-ALTER TABLE `carteiras`
-MODIFY `id_carteira` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
---
--- AUTO_INCREMENT de tabela `lojistas`
---
-ALTER TABLE `lojistas`
-MODIFY `id_lojista` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
---
--- AUTO_INCREMENT de tabela `transferencia`
---
-ALTER TABLE `transferencia`
-MODIFY `id_transferencia` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `transfers`
+  MODIFY `id_transfer` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
 --
 -- AUTO_INCREMENT de tabela `users`
 --
 ALTER TABLE `users`
-MODIFY `id_user` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_user` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
 --
 -- Restrições para tabelas despejadas
 --
+
 --
--- Restrições para tabelas `carteiras`
+-- Restrições para tabelas `shopkeepers`
 --
-ALTER TABLE `carteiras`
-ADD CONSTRAINT `carteiras_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`);
+ALTER TABLE `shopkeepers`
+  ADD CONSTRAINT `shopkeepers_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`);
+
 --
--- Restrições para tabelas `lojistas`
+-- Restrições para tabelas `transfers`
 --
-ALTER TABLE `lojistas`
-ADD CONSTRAINT `lojistas_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`);
+ALTER TABLE `transfers`
+  ADD CONSTRAINT `transfers_id_payee_foreign` FOREIGN KEY (`id_payee`) REFERENCES `users` (`id_user`),
+  ADD CONSTRAINT `transfers_id_payer_foreign` FOREIGN KEY (`id_payer`) REFERENCES `users` (`id_user`);
+
 --
--- Restrições para tabelas `transferencia`
+-- Restrições para tabelas `wallets`
 --
-ALTER TABLE `transferencia`
-ADD CONSTRAINT `transferencia_id_destinatario_foreign` FOREIGN KEY (`id_destinatario`) REFERENCES `users` (`id_user`),
-  ADD CONSTRAINT `transferencia_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`);
+ALTER TABLE `wallets`
+  ADD CONSTRAINT `wallets_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`);
 COMMIT;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */
-;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */
-;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */
-;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
