@@ -2,20 +2,20 @@ import { Request, Response, response } from "express";
 import sendResponse from "../utils/response.js";
 
 import Controller from "./Controller.js";
-import ICarteiraRepo from "../database/repos/CarteiraRepo.js";
-import CarteiraRepositoryImpl from "../database/repos/implementation/CarteiraRepositoryImpl.js";
+import IWalletRepo from "../database/repos/WalletRepo.js";
+import WalletRepositoryImpl from "../database/repos/implementation/WalletRepositoryImpl.js";
 
-import ListCarteiraById from "../usecases/ListCarteiraById.js";
-import ListCarteiraByUserId from "../usecases/ListCarteiraByUserId.js";
-import EditCarteira from "../usecases/EditCarteira.js";
+import ListWalletById from "../usecases/ListWalletById.js";
+import ListWalletByUserId from "../usecases/ListWalletByUserId.js";
+import EditWallet from "../usecases/EditWallet.js";
 
-export default class CarteiraController extends Controller {
-    repository: ICarteiraRepo;
+export default class WalletController extends Controller {
+    repository: IWalletRepo;
 
     constructor() {
         super();
 
-        this.repository = new CarteiraRepositoryImpl();
+        this.repository = new WalletRepositoryImpl();
     }
 
     public async index(req: Request, res: Response): Promise<Response> {
@@ -23,14 +23,14 @@ export default class CarteiraController extends Controller {
     }
 
     public async show(req: Request, res: Response): Promise<Response> {
-        const id_carteira = Number(req.params.id) ?? 0;
+        const id_wallet = Number(req.params.id) ?? 0;
         const id_user = Number(req.params.id_user) ?? 0;
 
-        const findCarteiraById = new ListCarteiraById(this.repository);
-        const findCarteiraByUserId = new ListCarteiraByUserId(this.repository);
+        const findWalletById = new ListWalletById(this.repository);
+        const findWalletByUserId = new ListWalletByUserId(this.repository);
 
-        if (id_carteira > 0)
-            return await findCarteiraById.execute(id_carteira)
+        if (id_wallet > 0)
+            return await findWalletById.execute(id_wallet)
                 .then(({ data, message }) => {
                     const userWithHateoas = {
                         ...data, links: [
@@ -43,7 +43,7 @@ export default class CarteiraController extends Controller {
                 })
                 .catch(err => sendResponse(req, res, 500, [], err.message, err));
         else
-            return await findCarteiraByUserId.execute(id_user)
+            return await findWalletByUserId.execute(id_user)
                 .then(({ data, message }) => {
                     const userWithHateoas = {
                         ...data, links: [
@@ -62,18 +62,18 @@ export default class CarteiraController extends Controller {
     }
 
     public async edit(req: Request, res: Response): Promise<Response> {
-        const id_carteira: number | undefined = Number(req.params.id) ?? 0;
+        const id_wallet: number | undefined = Number(req.params.id) ?? 0;
         const id_user: number | undefined = Number(req.params.id_user) ?? 0;
-        const saldo: number | undefined = parseFloat(req.body.saldo) ?? undefined;
+        const balance: number | undefined = parseFloat(req.body.balance) ?? undefined;
 
-        const editCarteira = new EditCarteira(this.repository);
+        const editWallet = new EditWallet(this.repository);
 
-        if (id_carteira > 0)
-            return await editCarteira.execute({ id_user, id_carteira, saldo })
+        if (id_wallet > 0)
+            return await editWallet.execute({ id_user, id_wallet, balance })
                 .then(({ data, message }) => sendResponse(req, res, 202, data, message))
                 .catch(err => sendResponse(req, res, 500, [], err.message, err));
         else
-            return await editCarteira.execute({ id_user, id_carteira, saldo })
+            return await editWallet.execute({ id_user, id_wallet, balance })
                 .then(({ data, message }) => sendResponse(req, res, 202, data, message))
                 .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }

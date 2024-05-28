@@ -27,7 +27,7 @@ export default class UserRepositoryImpl implements IUserRepo {
 
     public async findUserById(userId: number): Promise<UserProps | undefined> {
         const user: UserProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
             .from('users')
             .where('id_user', userId);
         return user[0];
@@ -35,7 +35,7 @@ export default class UserRepositoryImpl implements IUserRepo {
 
     public async findUserByCPF(cpf: string): Promise<UserProps | undefined> {
         const user: UserProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
             .from('users')
             .where('cpf_cnpj', cpf);
         return user[0];
@@ -43,7 +43,7 @@ export default class UserRepositoryImpl implements IUserRepo {
 
     public async findUserByCNPJ(cnpj: string): Promise<UserProps | undefined> {
         const user: UserProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
             .from('users')
             .where('cpf_cnpj', cnpj);
         return user[0];
@@ -51,7 +51,7 @@ export default class UserRepositoryImpl implements IUserRepo {
 
     public async findUserByEmail(email: string): Promise<UserProps | undefined> {
         const user: UserProps[] = await this.conn
-            .select('id_user', 'nome', 'cpf_cnpj', 'tipo_pessoa', 'email')
+            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
             .from('users')
             .where('email', email);
         return user[0];

@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import APIRouter from "./Router.js";
-import CarteiraController from "../controllers/CarteiraController.js";
+import WalletController from "../controllers/WalletController.js";
 
-export default class CarteiraRouter extends APIRouter {
+export default class WalletRouter extends APIRouter {
     constructor() {
         super();
 
-        this.controller = new CarteiraController();
+        this.controller = new WalletController();
     }
 
     protected create(): void {

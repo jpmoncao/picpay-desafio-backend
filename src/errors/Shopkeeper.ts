@@ -1,4 +1,4 @@
-export class LojistaNotFoundError extends Error {
+export class ShopkeeperNotFoundError extends Error {
     name: string;
     message: string;
     code: string;
@@ -6,12 +6,12 @@ export class LojistaNotFoundError extends Error {
     constructor(message: string) {
         super(message);
 
-        this.name = 'LojistaNotFoundError';
+        this.name = 'ShopkeeperNotFoundError';
         this.code = 'LOJISTA_NOT_FOUND'
     }
 }
 
-export class LojistaMissingDataError extends Error {
+export class ShopkeeperMissingDataError extends Error {
     name: string;
     message: string;
     code: string;
@@ -19,12 +19,12 @@ export class LojistaMissingDataError extends Error {
     constructor(message: string) {
         super(message);
 
-        this.name = 'LojistaMissingDataError';
+        this.name = 'ShopkeeperMissingDataError';
         this.code = 'LOJISTA_HAS_MISSING_DATA'
     }
 }
 
-export class LojistaAlreadyExistsError extends Error {
+export class ShopkeeperAlreadyExistsError extends Error {
     name: string;
     message: string;
     code: string;
@@ -32,7 +32,7 @@ export class LojistaAlreadyExistsError extends Error {
     constructor(message: string) {
         super(message);
 
-        this.name = 'LojistaAlreadyExistsError';
+        this.name = 'ShopkeeperAlreadyExistsError';
         this.code = 'LOJISTA_ALREADY_EXISTS';
     }
 }

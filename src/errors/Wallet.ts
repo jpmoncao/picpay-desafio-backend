@@ -1,4 +1,4 @@
-export class CarteiraNotFoundError extends Error {
+export class WalletNotFoundError extends Error {
     name: string;
     message: string;
     code: string;
@@ -6,12 +6,12 @@ export class CarteiraNotFoundError extends Error {
     constructor(message: string) {
         super(message);
 
-        this.name = 'CarteiraNotFoundError';
+        this.name = 'WalletNotFoundError';
         this.code = 'CARTEIRA_NOT_FOUND'
     }
 }
 
-export class CarteiraMissingDataError extends Error {
+export class WalletMissingDataError extends Error {
     name: string;
     message: string;
     code: string;
@@ -19,7 +19,7 @@ export class CarteiraMissingDataError extends Error {
     constructor(message: string) {
         super(message);
 
-        this.name = 'CarteiraMissingDataError';
+        this.name = 'WalletMissingDataError';
         this.code = 'CARTEIRA_HAS_MISSING_DATA'
     }
 }

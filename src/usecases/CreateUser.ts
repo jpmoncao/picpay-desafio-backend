@@ -13,25 +13,25 @@ export default class CreateUser {
     }
 
     async execute(props: UserProps): Promise<UseCase> {
-        let { nome, email, senha, cpf_cnpj, tipo_pessoa } = props;
+        let { name, email, password, cpf_cnpj, person_type } = props;
 
-        if (!nome || nome.trim() == '' ||
+        if (!name || name.trim() == '' ||
             !email || email.trim() == '' ||
-            !senha || senha.trim() == '' ||
+            !password || password.trim() == '' ||
             !cpf_cnpj || cpf_cnpj.trim() == '' ||
-            !tipo_pessoa || tipo_pessoa.trim() == '')
+            !person_type || person_type.trim() == '')
             throw new UserMissingDataError(`Há dados obrigatórios faltando!`);
 
         let usernameAlreadyExits: UserProps | undefined = undefined;
-        if (tipo_pessoa === 'F')
+        if (person_type === 'F')
             usernameAlreadyExits = await this.repository.findUserByCPF(cpf_cnpj ?? '');
-        else if (tipo_pessoa === 'J')
+        else if (person_type === 'J')
             usernameAlreadyExits = await this.repository.findUserByCNPJ(cpf_cnpj ?? '');
 
         if (usernameAlreadyExits !== undefined) {
-            if (tipo_pessoa === 'F')
+            if (person_type === 'F')
                 throw new UserDuplicateCPFError(`O CPF '${cpf_cnpj}' já está sendo usado por outro usuário!`);
-            else if (tipo_pessoa === 'J')
+            else if (person_type === 'J')
                 throw new UserDuplicateCNPJError(`O CNPJ '${cpf_cnpj}' já está sendo usado por outro usuário!`);
         }
 
@@ -39,12 +39,12 @@ export default class CreateUser {
         if (usernameAlreadyExits !== undefined)
             throw new UserDuplicateEmailError(`O e-mail inserido já está sendo usado por outro usuário!`);
 
-        if (tipo_pessoa === 'F' && !validarCPF(cpf_cnpj))
+        if (person_type === 'F' && !validarCPF(cpf_cnpj))
             throw new UserIncorrectPatternError(`O CPF não é válido!`);
-        else if (tipo_pessoa === 'J' && !validarCNPJ(cpf_cnpj))
+        else if (person_type === 'J' && !validarCNPJ(cpf_cnpj))
             throw new UserIncorrectPatternError(`O CPF não é válido!`);
 
-        const userId = await this.repository.createUser({ nome, email, senha, cpf_cnpj, tipo_pessoa });
+        const userId = await this.repository.createUser({ name, email, password, cpf_cnpj, person_type });
         const data = await this.repository.findUserById(Number(userId));
 
         return {

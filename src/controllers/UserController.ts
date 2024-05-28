@@ -5,14 +5,14 @@ import Controller from "./Controller.js";
 import UserProps from "../database/domain/user.js";
 import IUserRepo from "../database/repos/UserRepo.js";
 import UserRepositoryImpl from "../database/repos/implementation/UserRepositoryImpl.js";
-import CarteiraRepositoryImpl from "../database/repos/implementation/CarteiraRepositoryImpl.js";
+import WalletRepositoryImpl from "../database/repos/implementation/WalletRepositoryImpl.js";
 
 import ListUser from "../usecases/ListUsers.js";
 import ListUserById from "../usecases/ListUserById.js";
 import CreateUser from "../usecases/CreateUser.js";
 import EditUser from "../usecases/EditUser.js";
 import DeleteUser from "../usecases/DeleteUser.js";
-import CreateCarteira from "../usecases/CreateCarteira.js";
+import CreateWallet from "../usecases/CreateWallet.js";
 
 import sendResponse from "../utils/response.js";
 
@@ -49,25 +49,25 @@ export default class UserController extends Controller {
     }
 
     public async store(req: Request, res: Response): Promise<Response> {
-        const carteiraRepository = new CarteiraRepositoryImpl();
+        const walletRepository = new WalletRepositoryImpl();
 
         const createUser = new CreateUser(this.repository);
-        const createCarteira = new CreateCarteira(carteiraRepository);
+        const createWallet = new CreateWallet(walletRepository);
 
-        const { id_user, nome, email, senha, cpf_cnpj, tipo_pessoa } = req.body;
+        const { id_user, name, email, password, cpf_cnpj, person_type } = req.body;
 
-        return await createUser.execute({ id_user, nome, email, senha, cpf_cnpj, tipo_pessoa })
+        return await createUser.execute({ id_user, name, email, password, cpf_cnpj, person_type })
             .then(async ({ data, message }) => {
                 const userWithHateoas = {
                     ...data, links: [
                         { rel: 'info', href: process.env.API_ADDRESS + '/user/' + data.id_user, method: 'GET' },
                         { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + data.id_user, method: 'PUT' },
                         { rel: 'delete', href: process.env.API_ADDRESS + '/user/delete/' + data.id_user, method: 'DELETE' },
-                        { rel: 'wallet', href: process.env.API_ADDRESS + '/carteira/user/' + data.id_user, method: 'GET' },
+                        { rel: 'wallet', href: process.env.API_ADDRESS + '/wallet/user/' + data.id_user, method: 'GET' },
                     ]
                 }
 
-                await createCarteira.execute({ id_user: data.id_user });
+                await createWallet.execute({ id_user: data.id_user });
 
                 return sendResponse(req, res, 202, userWithHateoas, message)
             })
@@ -78,9 +78,9 @@ export default class UserController extends Controller {
         const editUser = new EditUser(this.repository);
 
         const id_user = Number(req.params.id);
-        const { nome, email, senha, cpf_cnpj, tipo_pessoa } = req.body;
+        const { name, email, password, cpf_cnpj, person_type } = req.body;
 
-        return await editUser.execute({ id_user, nome, email, senha, cpf_cnpj, tipo_pessoa })
+        return await editUser.execute({ id_user, name, email, password, cpf_cnpj, person_type })
             .then(({ data, message }) => {
                 const userWithHateoas = {
                     ...data, links: [

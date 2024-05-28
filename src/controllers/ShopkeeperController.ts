@@ -3,39 +3,39 @@ import sendResponse from "../utils/response.js";
 import dotenv from 'dotenv';
 
 import Controller from "./Controller.js";
-import LojistaProps from "../database/domain/lojista.js";
-import ILojistaRepo from "../database/repos/LojistaRepo.js";
-import LojistaRepositoryImpl from "../database/repos/implementation/LojistaRepositoryImpl.js";
+import ShopkeeperProps from "../database/domain/shopkeeper.js";
+import IShopkeeperRepo from "../database/repos/ShopkeeperRepo.js";
+import ShopkeeperRepositoryImpl from "../database/repos/implementation/ShopkeeperRepositoryImpl.js";
 import UserRepositoryImpl from "../database/repos/implementation/UserRepositoryImpl.js";
-import CarteiraRepositoryImpl from "../database/repos/implementation/CarteiraRepositoryImpl.js";
+import WalletRepositoryImpl from "../database/repos/implementation/WalletRepositoryImpl.js";
 
 import CreateUser from "../usecases/CreateUser.js";
-import ListLojista from "../usecases/ListLojistas.js";
-import ListLojistaById from "../usecases/ListLojistaById.js";
-import CreateLojista from "../usecases/CreateLojista.js";
-import EditCarteira from "../usecases/EditCarteira.js";
+import ListShopkeeper from "../usecases/ListShopkeepers.js";
+import ListShopkeeperById from "../usecases/ListShopkeeperById.js";
+import CreateShopkeeper from "../usecases/CreateShopkeeper.js";
+import EditWallet from "../usecases/EditWallet.js";
 
 import { UserNotFoundError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
-import { LojistaMissingDataError, LojistaNotFoundError } from '../errors/Lojista.js';
+import { ShopkeeperMissingDataError, ShopkeeperNotFoundError } from '../errors/Shopkeeper.js';
 
 dotenv.config();
 
-export default class LojistaController extends Controller {
-    repository: ILojistaRepo;
+export default class ShopkeeperController extends Controller {
+    repository: IShopkeeperRepo;
 
     constructor() {
         super();
 
-        this.repository = new LojistaRepositoryImpl();
+        this.repository = new ShopkeeperRepositoryImpl();
     }
 
     public async index(req: Request, res: Response): Promise<Response> {
-        const listLojista = new ListLojista(this.repository);
+        const listShopkeeper = new ListShopkeeper(this.repository);
         const { page, limit } = req.query;
 
-        return await listLojista.execute(Number(page ?? 1), Number(limit ?? 10))
+        return await listShopkeeper.execute(Number(page ?? 1), Number(limit ?? 10))
             .then(({ data, message }) => {
-                const lojistaWithHateoas = data.map((user: LojistaProps) => {
+                const shopkeeperWithHateoas = data.map((user: ShopkeeperProps) => {
                     return {
                         ...user, links: [
                             { rel: 'info', href: process.env.API_ADDRESS + '/user/' + user.id_user, method: 'GET' }
@@ -43,7 +43,7 @@ export default class LojistaController extends Controller {
                     }
                 })
 
-                return sendResponse(req, res, 202, lojistaWithHateoas, message)
+                return sendResponse(req, res, 202, shopkeeperWithHateoas, message)
             })
             .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }
@@ -52,45 +52,45 @@ export default class LojistaController extends Controller {
         const userRepository = new UserRepositoryImpl();
         const createUser = new CreateUser(userRepository);
 
-        const carteiraRepository = new CarteiraRepositoryImpl();
-        const editCarteira = new EditCarteira(carteiraRepository);
+        const walletRepository = new WalletRepositoryImpl();
+        const editWallet = new EditWallet(walletRepository);
 
-        const { nome, email, senha, cpf_cnpj, tipo_pessoa } = req.body;
+        const { name, email, password, cpf_cnpj, person_type } = req.body;
 
         let id_user = Number(req.params.id) ?? 0;
 
         try {
             if (id_user <= 0)
-                id_user = await createUser.execute({ nome, email, senha, cpf_cnpj, tipo_pessoa })
+                id_user = await createUser.execute({ name, email, password, cpf_cnpj, person_type })
                     .then(async ({ data }) => data.id_user)
                     .catch(err => { throw err });
 
-            const createLojista = new CreateLojista(this.repository);
-            return await createLojista.execute({ id_user })
+            const createShopkeeper = new CreateShopkeeper(this.repository);
+            return await createShopkeeper.execute({ id_user })
                 .then(({ data, message }) => {
-                    const lojistaWithHateoas = {
+                    const shopkeeperWithHateoas = {
                         ...data, links: [
                             { rel: 'info', href: process.env.API_ADDRESS + '/user/' + id_user, method: 'GET' },
-                            { rel: 'wallet', href: process.env.API_ADDRESS + '/carteira/user/' + id_user, method: 'GET' },
+                            { rel: 'wallet', href: process.env.API_ADDRESS + '/wallet/user/' + id_user, method: 'GET' },
                         ]
                     }
 
-                    editCarteira.execute({ id_user, lojista: true })
+                    editWallet.execute({ id_user, shopkeeper: true })
 
-                    return sendResponse(req, res, 202, lojistaWithHateoas, message)
+                    return sendResponse(req, res, 202, shopkeeperWithHateoas, message)
                 })
                 .catch(err => { throw err })
-        } catch (err: any | Error | UserNotFoundError | UserIncorrectPatternError | UserMissingDataError | LojistaMissingDataError | LojistaNotFoundError) {
+        } catch (err: any | Error | UserNotFoundError | UserIncorrectPatternError | UserMissingDataError | ShopkeeperMissingDataError | ShopkeeperNotFoundError) {
             return sendResponse(req, res, 500, [], err.message ?? '', err);
         }
     }
 
     public async show(req: Request, res: Response): Promise<Response> {
-        const listLojistaById = new ListLojistaById(this.repository);
+        const listShopkeeperById = new ListShopkeeperById(this.repository);
 
         const id = Number(req.params?.id);
 
-        return await listLojistaById.execute(id)
+        return await listShopkeeperById.execute(id)
             .then(({ data, message }) => sendResponse(req, res, 202, data, message))
             .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }

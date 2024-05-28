@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import APIRouter from "./Router.js";
-import LojistaController from "../controllers/LojistaController.js";
+import ShopkeeperController from "../controllers/ShopkeeperController.js";
 
-export default class LojistaRouter extends APIRouter {
+export default class ShopkeeperRouter extends APIRouter {
     constructor() {
         super();
 
-        this.controller = new LojistaController();
+        this.controller = new ShopkeeperController();
     }
 
     protected create(): void {
