@@ -14,7 +14,7 @@ export default class ListUsers {
 
             return {
                 data,
-                message: 'Shopkeepers listados com sucesso!'
+                message: 'Lojistas listados com sucesso!'
             };
         } catch (error) {
             throw error;
