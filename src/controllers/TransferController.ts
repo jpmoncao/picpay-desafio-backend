@@ -16,6 +16,8 @@ import EditWallet from "../usecases/EditWallet.js";
 
 import { TransferNotFoundError, TransferMissingDataError, TransferShopkeeperPayerError, TransferPayerIsEqualPayeeError, TransferAmountIsInvalidError } from '../errors/Transfer.js';
 import { UserNotFoundError } from "../errors/User.js";
+import WalletProps from "../database/domain/wallet.js";
+import { WalletNotFoundError } from "../errors/Wallet.js";
 
 export default class TransferController extends Controller {
     repository: ITransferRepo;
@@ -78,6 +80,21 @@ export default class TransferController extends Controller {
             if (amountValue <= 0)
                 throw new TransferAmountIsInvalidError('O valor da transferência é invalido! Deve ser maior que zero.')
 
+            const userPayerWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayerId)
+                .then(({ data }) => data)
+                .catch(err => undefined);
+
+            if (!userPayerWallet)
+                throw new WalletNotFoundError('A carteira do pagador não está ativa ou ainda não existe!');
+
+            const userPayeeWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayeeId)
+                .then(({ data }) => data)
+                .catch(err => undefined);
+
+            if (!userPayeeWallet)
+                throw new WalletNotFoundError('A carteira do recebedor não está ativa ou ainda não existe!');
+
+            
 
             this.trx.commit();
             return sendResponse(req, res, 202, [], 'Transferência efetuada com sucesso!');

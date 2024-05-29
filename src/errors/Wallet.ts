@@ -23,3 +23,16 @@ export class WalletMissingDataError extends Error {
         this.code = 'WALLET_HAS_MISSING_DATA'
     }
 }
+
+export class WalletHasInsufficientAmountError extends Error {
+    name: string;
+    message: string;
+    code: string;
+
+    constructor(message: string) {
+        super(message);
+
+        this.name = 'WalletInsufficientAmountError';
+        this.code = 'WALLET_HAS_INSUFFICIENT_AMOUNT'
+    }
+}
