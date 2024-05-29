@@ -2,15 +2,11 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
 --
 -- Banco de dados: `banco`
 --
+CREATE DATABASE IF NOT EXISTS `banco` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+USE `banco`;
 
 -- --------------------------------------------------------
 
@@ -18,6 +14,7 @@ SET time_zone = "+00:00";
 -- Estrutura para tabela `shopkeepers`
 --
 
+DROP TABLE IF EXISTS `shopkeepers`;
 CREATE TABLE `shopkeepers` (
   `id_shopkeeper` int(10) UNSIGNED NOT NULL,
   `id_user` int(10) UNSIGNED NOT NULL
@@ -29,6 +26,7 @@ CREATE TABLE `shopkeepers` (
 -- Estrutura para tabela `transfers`
 --
 
+DROP TABLE IF EXISTS `transfers`;
 CREATE TABLE `transfers` (
   `id_transfer` int(10) UNSIGNED NOT NULL,
   `id_payer` int(10) UNSIGNED NOT NULL,
@@ -43,6 +41,7 @@ CREATE TABLE `transfers` (
 -- Estrutura para tabela `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id_user` int(10) UNSIGNED NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -59,6 +58,7 @@ CREATE TABLE `users` (
 -- Estrutura para tabela `wallets`
 --
 
+DROP TABLE IF EXISTS `wallets`;
 CREATE TABLE `wallets` (
   `id_wallet` int(10) UNSIGNED NOT NULL,
   `id_user` int(10) UNSIGNED NOT NULL,
@@ -103,6 +103,12 @@ ALTER TABLE `wallets`
 --
 
 --
+-- AUTO_INCREMENT de tabela `shopkeepers`
+--
+ALTER TABLE `shopkeepers`
+  MODIFY `id_shopkeeper` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de tabela `transfers`
 --
 ALTER TABLE `transfers`
@@ -113,6 +119,12 @@ ALTER TABLE `transfers`
 --
 ALTER TABLE `users`
   MODIFY `id_user` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `wallets`
+--
+ALTER TABLE `wallets`
+  MODIFY `id_wallet` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- Restrições para tabelas despejadas
@@ -137,7 +149,3 @@ ALTER TABLE `transfers`
 ALTER TABLE `wallets`
   ADD CONSTRAINT `wallets_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`);
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
