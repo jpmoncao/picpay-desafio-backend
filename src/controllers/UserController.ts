@@ -23,11 +23,16 @@ export default class UserController extends Controller {
 
     constructor() {
         super();
+    }
 
-        this.repository = new UserRepositoryImpl();
+    public async init() {
+        this.trx = await this.initTransition();
+        this.repository = new UserRepositoryImpl(this.trx);
     }
 
     public async index(req: Request, res: Response): Promise<Response> {
+        await this.init();
+
         const listUser = new ListUser(this.repository);
         const { page, limit } = req.query;
 
@@ -49,7 +54,9 @@ export default class UserController extends Controller {
     }
 
     public async store(req: Request, res: Response): Promise<Response> {
-        const walletRepository = new WalletRepositoryImpl();
+        await this.init();
+
+        const walletRepository = new WalletRepositoryImpl(this.trx);
 
         const createUser = new CreateUser(this.repository);
         const createWallet = new CreateWallet(walletRepository);
@@ -69,12 +76,18 @@ export default class UserController extends Controller {
 
                 await createWallet.execute({ id_user: data.id_user });
 
+                this.trx.commit();
                 return sendResponse(req, res, 202, userWithHateoas, message)
             })
-            .catch(err => sendResponse(req, res, 500, [], err.message, err))
+            .catch(err => {
+                this.trx.rollback();
+                return sendResponse(req, res, 500, [], err.message, err)
+            })
     }
 
     public async edit(req: Request, res: Response): Promise<Response> {
+        await this.init();
+
         const editUser = new EditUser(this.repository);
 
         const id_user = Number(req.params.id);
@@ -90,23 +103,37 @@ export default class UserController extends Controller {
                     ]
                 }
 
+                this.trx.commit();
                 return sendResponse(req, res, 202, userWithHateoas, message)
             })
-            .catch(err => sendResponse(req, res, 500, [], err.message, err))
+            .catch(err => {
+                this.trx.rollback();
+                return sendResponse(req, res, 500, [], err.message, err)
+            })
     }
 
     public async destroy(req: Request, res: Response): Promise<Response> {
+        await this.init();
+
         const deleteUser = new DeleteUser(this.repository);
 
         const id = Number(req.params.id);
         const { name, username, password } = req.body;
 
         return await deleteUser.execute({ id, name, username, password })
-            .then(({ data, message }) => sendResponse(req, res, 202, data, message))
-            .catch(err => sendResponse(req, res, 500, [], err.message, err))
+            .then(({ data, message }) => {
+                this.trx.commit();
+                return sendResponse(req, res, 202, data, message);
+            })
+            .catch(err => {
+                this.trx.rollback();
+                return sendResponse(req, res, 500, [], err.message, err);
+            })
     }
 
     public async show(req: Request, res: Response): Promise<Response> {
+        await this.init();
+
         const listUserById = new ListUserById(this.repository);
 
         const id = Number(req.params?.id);

@@ -7,7 +7,7 @@ export class ShopkeeperNotFoundError extends Error {
         super(message);
 
         this.name = 'ShopkeeperNotFoundError';
-        this.code = 'LOJISTA_NOT_FOUND'
+        this.code = 'SHOPKEEPER_NOT_FOUND'
     }
 }
 
@@ -20,7 +20,7 @@ export class ShopkeeperMissingDataError extends Error {
         super(message);
 
         this.name = 'ShopkeeperMissingDataError';
-        this.code = 'LOJISTA_HAS_MISSING_DATA'
+        this.code = 'SHOPKEEPER_HAS_MISSING_DATA'
     }
 }
 
@@ -33,6 +33,6 @@ export class ShopkeeperAlreadyExistsError extends Error {
         super(message);
 
         this.name = 'ShopkeeperAlreadyExistsError';
-        this.code = 'LOJISTA_ALREADY_EXISTS';
+        this.code = 'SHOPKEEPER_ALREADY_EXISTS';
     }
 }

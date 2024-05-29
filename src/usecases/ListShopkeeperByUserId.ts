@@ -10,7 +10,7 @@ export default class ListShopkeeperById {
     }
 
     async execute(id: number, throwErr: boolean = true): Promise<UseCase> {
-        const data = await this.repository.findShopkeeperById(id);
+        const data = await this.repository.findShopkeeperByUserId(id);
 
         if (data == undefined && throwErr)
             throw new ShopkeeperNotFoundError(`Nenhum lojista foi encontrado com esse id! (ID: ${id})`)

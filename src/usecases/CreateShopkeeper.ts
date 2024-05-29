@@ -2,7 +2,7 @@ import UserRepositoryImpl from "../database/repos/implementation/UserRepositoryI
 
 import IShopkeeperRepo from "../database/repos/ShopkeeperRepo.js";
 import ShopkeeperProps from "../database/domain/shopkeeper.js";
-import ListShopkeeperById from "./ListShopkeeperById.js";
+import ListShopkeeperById from "./ListShopkeeperByUserId.js";
 import UseCase from "../types/UseCase.js";
 
 import { ShopkeeperAlreadyExistsError, ShopkeeperMissingDataError } from "../errors/Shopkeeper.js";
@@ -28,7 +28,7 @@ export default class CreateShopkeeper {
 
         const shopkeeperId = await this.repository.createShopkeeper({ id_user });
 
-        const userRepository = new UserRepositoryImpl();
+        const userRepository = new UserRepositoryImpl(this.repository.trx);
         const data = await userRepository.findUserById(Number(id_user));
 
         return {

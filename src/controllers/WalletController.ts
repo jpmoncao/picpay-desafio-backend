@@ -14,8 +14,11 @@ export default class WalletController extends Controller {
 
     constructor() {
         super();
+    }
 
-        this.repository = new WalletRepositoryImpl();
+    public async init() {
+        this.trx = await this.initTransition();
+        this.repository = new WalletRepositoryImpl(this.trx);
     }
 
     public async index(req: Request, res: Response): Promise<Response> {
@@ -23,6 +26,8 @@ export default class WalletController extends Controller {
     }
 
     public async show(req: Request, res: Response): Promise<Response> {
+        await this.init();
+
         const id_wallet = Number(req.params.id) ?? 0;
         const id_user = Number(req.params.id_user) ?? 0;
 
@@ -62,6 +67,8 @@ export default class WalletController extends Controller {
     }
 
     public async edit(req: Request, res: Response): Promise<Response> {
+        await this.init();
+
         const id_wallet: number | undefined = Number(req.params.id) ?? 0;
         const id_user: number | undefined = Number(req.params.id_user) ?? 0;
         const balance: number | undefined = parseFloat(req.body.balance) ?? undefined;
@@ -70,12 +77,24 @@ export default class WalletController extends Controller {
 
         if (id_wallet > 0)
             return await editWallet.execute({ id_user, id_wallet, balance })
-                .then(({ data, message }) => sendResponse(req, res, 202, data, message))
-                .catch(err => sendResponse(req, res, 500, [], err.message, err));
+                .then(({ data, message }) => {
+                    this.trx.commit();
+                    return sendResponse(req, res, 202, data, message);
+                })
+                .catch(err => {
+                    this.trx.rollback();
+                    return sendResponse(req, res, 500, [], err.message, err);
+                });
         else
             return await editWallet.execute({ id_user, id_wallet, balance })
-                .then(({ data, message }) => sendResponse(req, res, 202, data, message))
-                .catch(err => sendResponse(req, res, 500, [], err.message, err))
+                .then(({ data, message }) => {
+                    this.trx.commit();
+                    return sendResponse(req, res, 202, data, message);
+                })
+                .catch(err => {
+                    this.trx.rollback();
+                    return sendResponse(req, res, 500, [], err.message, err);
+                });
     }
 
     public async destroy(req: Request, res: Response): Promise<Response> {

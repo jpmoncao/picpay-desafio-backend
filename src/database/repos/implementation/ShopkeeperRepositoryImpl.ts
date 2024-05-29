@@ -4,68 +4,60 @@ import ShopkeeperProps from "../../domain/shopkeeper.js";
 import IShopkeeperRepo from "../ShopkeeperRepo.js";
 
 export default class ShopkeeperRepositoryImpl implements IShopkeeperRepo {
-    public conn: Knex<any, any[]>;
+    trx: Knex.Transaction<any, any[]>;
 
-    constructor() {
-        this.conn = createConn();
+    constructor(trx: Knex.Transaction<any, any[]>) {
+        this.trx = trx;
     }
 
     public async findShopkeepers(page: number, limit: number): Promise<ShopkeeperProps[] | undefined> {
-        if (page < 1)
-            page = 1;
+        if (page < 1) page = 1;
+        if (limit < 1) limit = 1;
 
-        if (limit < 1)
-            limit = 1;
-
-        return await this.conn
-            .select()
-            .limit((limit * page))
-            .offset((limit * page) - limit)
+        const shopkeepers = await this.trx('shopkeepers')
+            .select('shopkeepers.id_shopkeeper', 'users.*')
+            .limit(limit)
+            .offset((page - 1) * limit)
             .orderBy('shopkeepers.id_user', 'asc')
-            .from('users')
-            .innerJoin('shopkeepers', 'users.id_user', 'shopkeepers.id_user');
+            .innerJoin('users', 'users.id_user', 'shopkeepers.id_user');
+        return shopkeepers;
     }
 
-    public async findShopkeeperById(userId: number): Promise<ShopkeeperProps | undefined> {
-        const user: ShopkeeperProps[] = await this.conn
+    public async findShopkeeperByUserId(userId: number): Promise<ShopkeeperProps | undefined> {
+        const shopkeeper: ShopkeeperProps[] = await this.trx('shopkeepers')
             .select('shopkeepers.id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
-            .from('users')
-            .innerJoin('shopkeepers', 'users.id_user', 'shopkeepers.id_user')
+            .innerJoin('users', 'shopkeepers.id_user', 'users.id_user')
             .where('shopkeepers.id_user', userId);
-        return user[0];
+        return shopkeeper[0];
     }
 
     public async findShopkeeperByCPF(cpf: string): Promise<ShopkeeperProps | undefined> {
-        const user: ShopkeeperProps[] = await this.conn
+        const shopkeeper: ShopkeeperProps[] = await this.trx('shopkeepers')
             .select('shopkeepers.id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
-            .from('users')
-            .innerJoin('shopkeepers', 'users.id_user', 'shopkeepers.id_user')
+            .innerJoin('users', 'shopkeepers.id_user', 'users.id_user')
             .where('cpf_cnpj', cpf);
-        return user[0];
+        return shopkeeper[0];
     }
 
     public async findShopkeeperByCNPJ(cnpj: string): Promise<ShopkeeperProps | undefined> {
-        const user: ShopkeeperProps[] = await this.conn
+        const shopkeeper: ShopkeeperProps[] = await this.trx('shopkeepers')
             .select('shopkeepers.id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
-            .from('users')
-            .innerJoin('shopkeepers', 'users.id_user', 'shopkeepers.id_user')
+            .innerJoin('users', 'shopkeepers.id_user', 'users.id_user')
             .where('cpf_cnpj', cnpj);
-        return user[0];
+        return shopkeeper[0];
     }
 
     public async findShopkeeperByEmail(email: string): Promise<ShopkeeperProps | undefined> {
-        const user: ShopkeeperProps[] = await this.conn
+        const shopkeeper: ShopkeeperProps[] = await this.trx('shopkeepers')
             .select('shopkeepers.id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
-            .from('users')
-            .innerJoin('shopkeepers', 'users.id_user', 'shopkeepers.id_user')
+            .innerJoin('users', 'shopkeepers.id_user', 'users.id_user')
             .where('email', email);
-        return user[0];
+        return shopkeeper[0];
     }
 
     public async createShopkeeper(props: ShopkeeperProps): Promise<ShopkeeperProps | undefined> {
-        const shopkeeperId: ShopkeeperProps = await this.conn
-            .insert(props)
-            .into('shopkeepers');
+        const shopkeeperId: ShopkeeperProps = await this.trx('shopkeepers')
+            .insert(props);
 
         return shopkeeperId;
     }

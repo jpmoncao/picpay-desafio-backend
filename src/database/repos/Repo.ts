@@ -1,5 +1,5 @@
 import { Knex } from "knex";
 
 export interface Repo {
-    conn: Knex<any, any[]>;
+    trx: Knex.Transaction<any, any[]>;
 }

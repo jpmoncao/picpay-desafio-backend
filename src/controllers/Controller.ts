@@ -1,9 +1,7 @@
 import { Knex } from "knex";
 import { Request, Response, response } from "express";
-import createConn from '../database/conn.js';
 import { Repo } from "../database/repos/Repo.js";
-import { ParamsDictionary } from "express-serve-static-core";
-import { ParsedQs } from "qs";
+import createConn from '../database/conn.js';
 
 interface IController {
     index?: (req: Request, res: Response) => Promise<Response>;
@@ -13,22 +11,26 @@ interface IController {
     destroy?: (req: Request, res: Response) => Promise<Response>;
 
     conn: Knex<any, any[]>;
-    repository: Repo;
-
+    trx: Knex.Transaction<any, any[]>;
+    repository: Repo | undefined;
     _req: Request;
     _res: Response;
 }
 
 export default class Controller implements IController {
-    conn: Knex<any, any[]>;
-
     _req: Request;
     _res: Response;
 
+    conn: Knex<any, any[]>;
+    trx: Knex.Transaction<any, any[]>;
     repository: Repo;
 
     constructor() {
         this.conn = createConn();
+    }
+
+    protected async initTransition(): Promise<Knex.Transaction<any, any[]>> {
+        return await this.conn.transaction();
     }
 
     public async index(req: Request, res: Response): Promise<Response> {

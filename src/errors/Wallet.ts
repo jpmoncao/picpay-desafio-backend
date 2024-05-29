@@ -7,7 +7,7 @@ export class WalletNotFoundError extends Error {
         super(message);
 
         this.name = 'WalletNotFoundError';
-        this.code = 'CARTEIRA_NOT_FOUND'
+        this.code = 'WALLET_NOT_FOUND'
     }
 }
 
@@ -20,6 +20,6 @@ export class WalletMissingDataError extends Error {
         super(message);
 
         this.name = 'WalletMissingDataError';
-        this.code = 'CARTEIRA_HAS_MISSING_DATA'
+        this.code = 'WALLET_HAS_MISSING_DATA'
     }
 }
