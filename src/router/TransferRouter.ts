@@ -10,6 +10,8 @@ export default class TransferRouter extends APIRouter {
     }
 
     protected create(): void {
-        this._router.get('/:id', (req: Request, res: Response) => this.controller.index(req, res));
+        this._router.get('/user/:id', (req: Request, res: Response) => this.controller.index(req, res));
+        this._router.get('/:id', (req: Request, res: Response) => this.controller.show(req, res));
+        this._router.post('/', (req: Request, res: Response) => this.controller.store(req, res));
     }
 }
