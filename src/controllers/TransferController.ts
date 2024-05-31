@@ -1,6 +1,8 @@
 import { Request, Response, response } from "express";
 import sendResponse from "../utils/response.js";
 
+import WalletProps from "../database/domain/wallet.js";
+
 import Controller from "./Controller.js";
 import ITransferRepo from "../database/repos/TransferRepo.js";
 
@@ -13,10 +15,10 @@ import ListUserById from "../usecases/ListUserById.js";
 import ListShopkeeperByUserId from "../usecases/ListShopkeeperByUserId.js";
 import ListWalletByUserId from "../usecases/ListWalletByUserId.js";
 import EditWallet from "../usecases/EditWallet.js";
+import CreateTransfer from "../usecases/CreateTransfer.js";
 
 import { TransferNotFoundError, TransferMissingDataError, TransferShopkeeperPayerError, TransferPayerIsEqualPayeeError, TransferAmountIsInvalidError } from '../errors/Transfer.js';
 import { UserNotFoundError } from "../errors/User.js";
-import WalletProps from "../database/domain/wallet.js";
 import { WalletNotFoundError } from "../errors/Wallet.js";
 
 export default class TransferController extends Controller {
@@ -54,7 +56,7 @@ export default class TransferController extends Controller {
             const listShopkeeperByUserId = new ListShopkeeperByUserId(shopkeeperRepository);
             const listWalletByUserId = new ListWalletByUserId(walletRepository);
             const editWallet = new EditWallet(walletRepository);
-            // const createTransfer = new CreateTransfer(this.repository);
+            const createTransfer = new CreateTransfer(this.repository);
 
             const userPayerId: number = await listUserById.execute(id_payer)
                 .then(({ data }) => data.id_user)
@@ -94,10 +96,12 @@ export default class TransferController extends Controller {
             if (!userPayeeWallet)
                 throw new WalletNotFoundError('A carteira do recebedor não está ativa ou ainda não existe!');
 
-            
+            const newTransfer = await createTransfer.execute({ userPayerId, userPayeeId, amountValue })
+                .then(({ data }) => data)
+                .catch(err => []);
 
             this.trx.commit();
-            return sendResponse(req, res, 202, [], 'Transferência efetuada com sucesso!');
+            return sendResponse(req, res, 202, newTransfer, 'Transferência efetuada com sucesso!');
         } catch (error:
             any |
             Error |
