@@ -11,10 +11,10 @@ const app = express();
 
 app.use(express.json());
 
-app.use('/user', new UserRouter().router);
-app.use('/shopkeeper', new ShopkeeperRouter().router);
-app.use('/wallet', new WalletRouter().router);
-app.use('/transfer', new TransferRouter().router);
+app.use('/users', new UserRouter().router);
+app.use('/shopkeepers', new ShopkeeperRouter().router);
+app.use('/wallets', new WalletRouter().router);
+app.use('/transfers', new TransferRouter().router);
 
 app.use('/', (req, res) => {
     res.status(202).json({
