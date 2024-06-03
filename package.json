@@ -16,12 +16,14 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
     "mysql2": "^3.9.7"
   },
   "type": "module",
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/nodemon": "^1.19.6",
     "nodemon": "^3.1.0",
     "typescript": "^5.4.5"
