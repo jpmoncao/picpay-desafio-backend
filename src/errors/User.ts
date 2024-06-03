@@ -74,3 +74,16 @@ export class UserIncorrectPatternError extends Error {
         this.code = 'USER_HAS_INCORRECT_DATA'
     }
 }
+
+export class UserPasswordIncorrectError extends Error {
+    name: string;
+    message: string;
+    code: string;
+
+    constructor(message: string) {
+        super(message);
+
+        this.name = 'UserPasswordIncorrectError';
+        this.code = 'USER_PASSWORD_INCORRECT'
+    }
+}

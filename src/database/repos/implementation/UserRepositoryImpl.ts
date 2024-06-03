@@ -45,10 +45,11 @@ export default class UserRepositoryImpl implements IUserRepo {
 
     public async findUserByEmail(email: string): Promise<UserProps | undefined> {
         const user: UserProps[] = await this.trx('users')
-            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
+            .select('id_user', 'email', 'password')
             .where('email', email);
         return user[0];
     }
+
 
     public async createUser(props: UserProps): Promise<UserProps | undefined> {
         const userId: UserProps = await this.trx('users')

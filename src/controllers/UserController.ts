@@ -13,6 +13,7 @@ import CreateUser from "../usecases/CreateUser.js";
 import EditUser from "../usecases/EditUser.js";
 import DeleteUser from "../usecases/DeleteUser.js";
 import CreateWallet from "../usecases/CreateWallet.js";
+import AuthenticateUser from "../usecases/AuthenticateUser.js";
 
 import sendResponse from "../utils/response.js";
 
@@ -152,5 +153,24 @@ export default class UserController extends Controller {
             .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }
 
+    public async login(req: Request, res: Response): Promise<Response> {
+        await this.init();
+
+        const authenticateUser = new AuthenticateUser(this.repository);
+        const { email, password } = req.body;
+
+        return await authenticateUser.execute({ email, password })
+            .then(({ data, message }) => {
+                const userWithHateoas = {
+                    ...data, links: [
+                        { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + data.id_user, method: 'PUT' },
+                        { rel: 'delete', href: process.env.API_ADDRESS + '/user/delete/' + data.id_user, method: 'DELETE' },
+                    ]
+                }
+
+                return sendResponse(req, res, 202, userWithHateoas, message)
+            })
+            .catch(err => sendResponse(req, res, 500, [], err.message, err))
+    }
 
 }
