@@ -4,6 +4,7 @@ import UseCase from "../types/UseCase.js";
 import { validarCPF, validarCNPJ } from "../utils/validate.js";
 
 import { UserDuplicateCNPJError, UserDuplicateCPFError, UserDuplicateEmailError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
+import { encrypt } from "../utils/hash.js";
 
 export default class CreateUser {
     repository: IUserRepo;
@@ -44,7 +45,9 @@ export default class CreateUser {
         else if (person_type === 'J' && !validarCNPJ(cpf_cnpj))
             throw new UserIncorrectPatternError(`O CPF não é válido!`);
 
-        const userId = await this.repository.createUser({ name, email, password, cpf_cnpj, person_type });
+        const passwordHash = encrypt(password);
+
+        const userId = await this.repository.createUser({ name, email, password: passwordHash, cpf_cnpj, person_type });
         const data = await this.repository.findUserById(Number(userId));
 
         return {

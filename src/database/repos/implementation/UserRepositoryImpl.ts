@@ -15,7 +15,7 @@ export default class UserRepositoryImpl implements IUserRepo {
         if (limit < 1) limit = 1;
 
         const users = await this.trx('users')
-            .select()
+            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
             .limit((limit * page))
             .offset((limit * page) - limit)
             .orderBy('id_user', 'asc');
