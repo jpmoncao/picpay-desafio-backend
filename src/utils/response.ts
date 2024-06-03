@@ -3,6 +3,16 @@ import dotenv from 'dotenv'
 
 dotenv.config();
 
+/**
+ * 
+ * @param req Request do router
+ * @param res Response do router
+ * @param status Http status da response
+ * @param data Dados para serem retornados (opcional)
+ * @param message Mensagem da response
+ * @param error Erro para ser retornado (opcional)
+ * @returns Retorna json da response
+ */
 export default function sendResponse(req: Request, res: Response, status: number, data: any[] | undefined, message: string, error?: any): Response {
     if (error) {
         const err = {

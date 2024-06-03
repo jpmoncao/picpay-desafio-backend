@@ -8,6 +8,11 @@ const algorithm = 'aes-256-cbc';
 const key = process.env.PWD_INIT_HASH ?? '';
 const iv = process.env.PWD_INIT_VECTOR ?? '';
 
+/**
+ * 
+ * @param text Texto para ser criptografado
+ * @returns Texto criptografado
+ */
 export function encrypt(text: string): string {
     if (!key || !iv) {
         throw new Error('A chave e o vetor de inicialização são necessários');
@@ -21,6 +26,11 @@ export function encrypt(text: string): string {
     return encrypted.toString('hex');
 }
 
+/**
+ * 
+ * @param text Texto para ser descriptografado
+ * @returns Texto descriptografado
+ */
 export function decrypt(text: string): string {
     if (!key || !iv) {
         throw new Error('A chave e o vetor de inicialização são necessários');

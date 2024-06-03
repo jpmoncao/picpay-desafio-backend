@@ -1,3 +1,8 @@
+/**
+ * 
+ * @param cnpj CNPJ para validar
+ * @returns CNPJ válido ou não
+ */
 export function validarCNPJ(cnpj: string): boolean {
     let cnpjNumber: number | undefined = Number(cnpj);
     if (!cnpjNumber)
@@ -42,6 +47,11 @@ export function validarCNPJ(cnpj: string): boolean {
     return true;
 }
 
+/**
+ * 
+ * @param cpf CPF para validar
+ * @returns CPF válido ou não
+ */
 export function validarCPF(cpf: string): boolean {
     let cpfNumber: number | undefined = Number(cpf);
     if (!cpfNumber)
