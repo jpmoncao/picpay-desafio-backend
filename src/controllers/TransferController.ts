@@ -95,7 +95,6 @@ export default class TransferController extends Controller {
             if (!userPayeeWallet)
                 throw new WalletNotFoundError('A carteira do recebedor não está ativa ou ainda não existe!');
 
-            console.log(userPayerWallet.balance ?? 0)
             if (amountValue > (userPayerWallet.balance ?? 0))
                 throw new WalletHasInsufficientAmountError('Não há saldo suficiente na carteira do pagador!');
 
@@ -114,7 +113,25 @@ export default class TransferController extends Controller {
             await new EditWallet(walletRepository).execute(userPayeeWallet);
 
             this.trx.commit();
-            return sendResponse(req, res, 202, newTransfer, 'Transferência efetuada com sucesso!');
+
+            const newTransferWithHATEOAS = {
+                ...newTransfer,
+                payer: {
+                    links: [
+                        { rel: 'show-payer', href: process.env.API_ADDRESS + '/users/' + userPayerWallet.id_user, method: 'GET' },
+                        { rel: 'show-payer-wallet', href: process.env.API_ADDRESS + '/wallets/user/' + userPayerWallet.id_user, method: 'GET' },
+                        { rel: 'show-payer-transfer', href: process.env.API_ADDRESS + '/transfers/user/' + userPayerWallet.id_user, method: 'GET' },
+                    ]
+                },
+                payee: {
+                    links: [
+                        { rel: 'show-payee', href: process.env.API_ADDRESS + '/users/' + userPayeeWallet.id_user, method: 'GET' },
+                        { rel: 'show-payee-wallet', href: process.env.API_ADDRESS + '/wallets/user/' + userPayeeWallet.id_user, method: 'GET' },
+                        { rel: 'show-payee-transfer', href: process.env.API_ADDRESS + '/transfers/user/' + userPayeeWallet.id_user, method: 'GET' },
+                    ]
+                },
+            }
+            return sendResponse(req, res, 202, newTransferWithHATEOAS, 'Transferência efetuada com sucesso!');
         } catch (error:
             any |
             Error |

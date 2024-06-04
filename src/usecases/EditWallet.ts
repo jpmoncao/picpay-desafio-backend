@@ -39,7 +39,7 @@ export default class EditWallet {
         if (shopkeeper && shopkeeper != wallet.shopkeeper)
             await this.repository.updateTypeWallet({ id_user, id_wallet, shopkeeper });
 
-        if (balance && balance != wallet.balance)
+        if (balance != wallet.balance)
             await this.repository.updateBalanceWallet({ id_user, id_wallet, balance });
 
         let data: WalletProps | undefined;

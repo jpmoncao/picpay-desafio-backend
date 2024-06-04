@@ -89,9 +89,9 @@ export default class TransferRepositoryImpl implements ITransferRepo {
     }
 
     public async createTransfer(props: TransferProps): Promise<TransferProps | undefined> {
-        const userId: TransferProps = await this.trx('transfers')
+        const transfer: TransferProps = await this.trx('transfers')
             .insert(props);
 
-        return userId;
+        return transfer;
     }
 }
