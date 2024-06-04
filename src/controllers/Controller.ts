@@ -29,6 +29,10 @@ export default class Controller implements IController {
         this.conn = createConn();
     }
 
+    public async init() {
+        this.trx = await this.initTransition();
+    }
+
     protected async initTransition(): Promise<Knex.Transaction<any, any[]>> {
         return await this.conn.transaction();
     }
