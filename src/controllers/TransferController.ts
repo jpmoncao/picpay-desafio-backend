@@ -17,9 +17,9 @@ import ListWalletByUserId from "../usecases/ListWalletByUserId.js";
 import EditWallet from "../usecases/EditWallet.js";
 import CreateTransfer from "../usecases/CreateTransfer.js";
 
-import { TransferNotFoundError, TransferMissingDataError, TransferShopkeeperPayerError, TransferPayerIsEqualPayeeError, TransferAmountIsInvalidError } from '../errors/Transfer.js';
 import { UserNotFoundError } from "../errors/User.js";
-import { WalletNotFoundError } from "../errors/Wallet.js";
+import { WalletHasInsufficientAmountError, WalletNotFoundError } from "../errors/Wallet.js";
+import { TransferNotFoundError, TransferMissingDataError, TransferShopkeeperPayerError, TransferPayerIsEqualPayeeError, TransferAmountIsInvalidError } from '../errors/Transfer.js';
 
 export default class TransferController extends Controller {
     repository: ITransferRepo;
@@ -55,7 +55,6 @@ export default class TransferController extends Controller {
             const listUserById = new ListUserById(userRepository);
             const listShopkeeperByUserId = new ListShopkeeperByUserId(shopkeeperRepository);
             const listWalletByUserId = new ListWalletByUserId(walletRepository);
-            const editWallet = new EditWallet(walletRepository);
             const createTransfer = new CreateTransfer(this.repository);
 
             const userPayerId: number = await listUserById.execute(id_payer)
@@ -82,23 +81,37 @@ export default class TransferController extends Controller {
             if (amountValue <= 0)
                 throw new TransferAmountIsInvalidError('O valor da transferência é invalido! Deve ser maior que zero.')
 
-            const userPayerWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayerId)
+            let userPayerWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayerId)
                 .then(({ data }) => data)
                 .catch(err => undefined);
 
             if (!userPayerWallet)
                 throw new WalletNotFoundError('A carteira do pagador não está ativa ou ainda não existe!');
 
-            const userPayeeWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayeeId)
+            let userPayeeWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayeeId)
                 .then(({ data }) => data)
                 .catch(err => undefined);
 
             if (!userPayeeWallet)
                 throw new WalletNotFoundError('A carteira do recebedor não está ativa ou ainda não existe!');
 
-            const newTransfer = await createTransfer.execute({ userPayerId, userPayeeId, amountValue })
+            console.log(userPayerWallet.balance ?? 0)
+            if (amountValue > (userPayerWallet.balance ?? 0))
+                throw new WalletHasInsufficientAmountError('Não há saldo suficiente na carteira do pagador!');
+
+            const newTransfer = await createTransfer.execute({ id_payer: userPayerId, id_payee: userPayeeId, amount: amountValue })
                 .then(({ data }) => data)
                 .catch(err => []);
+
+            if (userPayerWallet && userPayerWallet.balance !== undefined && userPayerWallet.balance !== null)
+                userPayerWallet.balance = Number(userPayerWallet.balance) - amountValue;
+
+
+            if (userPayeeWallet && userPayeeWallet.balance !== undefined && userPayeeWallet.balance !== null)
+                userPayeeWallet.balance = Number(userPayeeWallet.balance) + amountValue;
+
+            await new EditWallet(walletRepository).execute(userPayerWallet);
+            await new EditWallet(walletRepository).execute(userPayeeWallet);
 
             this.trx.commit();
             return sendResponse(req, res, 202, newTransfer, 'Transferência efetuada com sucesso!');

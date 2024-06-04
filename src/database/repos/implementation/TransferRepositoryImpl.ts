@@ -12,15 +12,20 @@ export default class TransferRepositoryImpl implements ITransferRepo {
 
     public async findTransferById(transferId: number): Promise<TransferProps | undefined> {
 
-        const transfers: TransferProps[] = await this.trx('transfers')
-            .select('transfers.id_transfer', 'transfers.amount', 'transfers.created_at',
-                'transfers.id_payer', 'user_payer.name', 'user_payer.cpf_cnpj', 'user_payer.person_type',
-                'transfers.id_payee', 'user_payee.name', 'user_payee.cpf_cnpj', 'user_payee.person_type')
-            .where('id_transfer', transferId)
-            .innerJoin('users as user_payer', 'user_payer.id_user', 'transfers.id_payer')
-            .innerJoin('users as user_payee', 'user_payee.id_user', 'transfers.id_payee');
-        return transfers[0];
+        const transfer = await this.trx('transfers')
+            .select(
+                'transfers.id_transfer',
+                'transfers.amount',
+                'transfers.created_at'
+            )
+            .where('transfers.id_transfer', transferId)
+            .first();
+
+        if (!transfer) return undefined;
+
+        return transfer;
     }
+
 
     public async findTransferByUserId(userId: number, page: number, limit: number): Promise<TransferProps[] | undefined> {
         if (page < 1)

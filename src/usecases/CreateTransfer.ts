@@ -13,7 +13,7 @@ export default class CreateTransfer {
         let { id_payer, id_payee, amount } = props;
 
         const transfer = await this.repository.createTransfer({ id_payer, id_payee, amount });
-        const data = await this.repository.findTransferById(transfer?.id_transfer ?? 0)[0];
+        const data = await this.repository.findTransferById(Number(transfer ?? 0));
 
         return {
             data,
