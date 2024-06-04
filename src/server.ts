@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import cors from 'cors';
 
 import UserRouter from './router/UserRouter.js';
 import ShopkeeperRouter from './router/ShopkeeperRouter.js';
@@ -9,6 +10,7 @@ import TransferRouter from './router/TransferRouter.js';
 dotenv.config();
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use('/users', new UserRouter().router);

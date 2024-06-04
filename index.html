@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="extrato"></div>
+    <div id="paginacao">
+        <button class="" id="prev" onclick="prev()">prev</button>
+        <button class="" id="next" onclick="next()">next</button>
+    </div>
+    <script>
+        let page = 1;
+
+        async function fetchData(limit, page) {
+            if (!limit)
+                limit = 10
+            if (!page)
+                page = 1
+
+            try {
+                const response = await fetch(`http://localhost:3000/transfers/user/1?limit=${limit}&page=${page}`, {
+                    headers: {
+                        'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxLCJuYW1lIjoiSm_Do28gUGVkcm8iLCJjcGZfY25waiI6IjQ4NzExMzk5ODA1IiwicGVyc29uX3R5cGUiOiJGIiwiZW1haWwiOiJwZWRyb2hqb2FvNDRAZW1haWwuY29tIiwiaWF0IjoxNzE3NTIxMTYzfQ.kGy1Xgsi_VJ3FrVxA5L3JkAIQbkQrTr0c2GMnYw5Jz8'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const res = await response.json();
+                console.log(res);
+
+                document.querySelector('#extrato').innerHTML = '<ul></ul>';
+                res.data.forEach(d => {
+                    document.querySelector('#extrato').innerHTML += `<li>${d.id_transfer} - R\$${d.amount}</li>`;
+                });
+
+            } catch (error) {
+                console.warn(error);
+            }
+        }
+
+        function prev() {
+            if (page == 1)
+                return;
+            page -= 1;
+            fetchData(3, page);
+        }
+
+        function next() {
+            page += 1;
+            fetchData(3, page);
+        }
+
+        fetchData(3, page);
+    </script>
+</body>
+
+</html>
