@@ -3,6 +3,7 @@ import UseCase from "../types/UseCase.js";
 import UserProps from "../database/domain/user.js";
 import { TransferMissingDataError } from "../errors/Transfer.js";
 
+import { mailTransferPayee, mailTransferPayer } from "../assets/mails-transfer.js";
 import sendMail from "../utils/mailer.js";
 
 export default class SendMailToTransfer {
@@ -14,8 +15,15 @@ export default class SendMailToTransfer {
                 throw new TransferMissingDataError(`Email cancelado pois falta dados para o envio!`);
             }
 
-            await sendMail(payerProps.email ?? '', '<h1>payer</h1>');
-            await sendMail(payeeProps.email ?? '', '<h1>payee</h1>');
+
+            await sendMail(payerProps.email ?? '', mailTransferPayer(
+                { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
+                { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
+                transferProps.amount));
+            await sendMail(payeeProps.email ?? '', mailTransferPayer(
+                { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
+                { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
+                transferProps.amount, false));
 
             return {
                 data: [],
