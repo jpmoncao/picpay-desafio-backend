@@ -36,7 +36,10 @@ export default function sendResponse(req: Request, res: Response, status: number
         limit = 1;
 
     return res.status(status).json({
-        _self: (process.env.API_ADDRESS ?? '') + req.originalUrl,
+        _self: {
+            href: (process.env.API_ADDRESS ?? '') + req.originalUrl,
+            method: req.method
+        },
         message,
         data,
         page,
