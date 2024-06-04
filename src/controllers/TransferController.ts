@@ -2,6 +2,7 @@ import { Response, response } from "express";
 import { TRequest } from "../types/TRequest.js";
 import sendResponse from "../utils/response.js";
 
+import UserProps from "../database/domain/user.js";
 import WalletProps from "../database/domain/wallet.js";
 
 import Controller from "./Controller.js";
@@ -20,6 +21,7 @@ import CreateTransfer from "../usecases/CreateTransfer.js";
 import ListTransfersByUserId from "../usecases/ListTransfersByUserId.js";
 import ListTransfersByPayerId from "../usecases/ListTransfersByPayerId.js";
 import ListTransfersByPayeeId from "../usecases/ListTransfersByPayeeId.js";
+import SendMailToTransfer from "../usecases/SendMailToTransfer.js";
 
 import { UserNotAuthorizedError, UserNotFoundError } from "../errors/User.js";
 import { WalletHasInsufficientAmountError, WalletNotFoundError } from "../errors/Wallet.js";
@@ -93,21 +95,21 @@ export default class TransferController extends Controller {
             const listWalletByUserId = new ListWalletByUserId(walletRepository);
             const createTransfer = new CreateTransfer(this.repository);
 
-            const userPayerId: number = await listUserById.execute(id_payer)
-                .then(({ data }) => data.id_user)
+            const userPayer: UserProps = await listUserById.execute(id_payer)
+                .then(({ data }) => data)
                 .catch(err => 0);
-            const userPayeeId: number = await listUserById.execute(id_payee)
-                .then(({ data }) => data.id_user)
+            const userPayee: UserProps = await listUserById.execute(id_payee)
+                .then(({ data }) => data)
                 .catch(err => 0);
 
-            if (!userPayerId && userPayeeId <= 0)
+            if (!userPayer.id_user && (userPayee?.id_user ?? 0) <= 0)
                 throw new UserNotFoundError('O usuário pagador não existe!');
-            if (!userPayeeId && userPayeeId <= 0)
+            if (!userPayee.id_user && (userPayee?.id_user ?? 0) <= 0)
                 throw new UserNotFoundError('O usuário recebedor não existe!');
-            if (userPayerId === userPayeeId)
+            if (userPayer.id_user === (userPayee?.id_user ?? 0))
                 throw new TransferPayerIsEqualPayeeError('O usuário pagador e recebedor são iguais!');
 
-            const userPayerIsShopkeeper: boolean = await listShopkeeperByUserId.execute(userPayerId)
+            const userPayerIsShopkeeper: boolean = await listShopkeeperByUserId.execute(userPayer.id_user ?? 0)
                 .then(({ data }) => data.id_user && data.id_user > 0)
                 .catch(err => false);
 
@@ -117,14 +119,14 @@ export default class TransferController extends Controller {
             if (amountValue <= 0)
                 throw new TransferAmountIsInvalidError('O valor da transferência é invalido! Deve ser maior que zero.')
 
-            let userPayerWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayerId)
+            let userPayerWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayer.id_user ?? 0)
                 .then(({ data }) => data)
                 .catch(err => undefined);
 
             if (!userPayerWallet)
                 throw new WalletNotFoundError('A carteira do pagador não está ativa ou ainda não existe!');
 
-            let userPayeeWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayeeId)
+            let userPayeeWallet: WalletProps | undefined = await listWalletByUserId.execute(userPayee.id_user ?? 0)
                 .then(({ data }) => data)
                 .catch(err => undefined);
 
@@ -134,7 +136,7 @@ export default class TransferController extends Controller {
             if (amountValue > (userPayerWallet.balance ?? 0))
                 throw new WalletHasInsufficientAmountError('Não há saldo suficiente na carteira do pagador!');
 
-            const newTransfer = await createTransfer.execute({ id_payer: userPayerId, id_payee: userPayeeId, amount: amountValue })
+            const newTransfer: any = await createTransfer.execute({ id_payer: userPayer.id_user ?? 0, id_payee: userPayee.id_user ?? 0, amount: amountValue })
                 .then(({ data }) => data)
                 .catch(err => []);
 
@@ -149,6 +151,8 @@ export default class TransferController extends Controller {
             await new EditWallet(walletRepository).execute(userPayeeWallet);
 
             this.trx.commit();
+
+            new SendMailToTransfer().execute(newTransfer, userPayer, userPayee);
 
             const newTransferWithHATEOAS = {
                 ...newTransfer,
@@ -167,6 +171,7 @@ export default class TransferController extends Controller {
                     ]
                 },
             }
+
             return sendResponse(req, res, 202, newTransferWithHATEOAS, 'Transferência efetuada com sucesso!');
         } catch (error:
             any |
