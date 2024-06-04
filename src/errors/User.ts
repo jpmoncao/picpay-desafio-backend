@@ -87,3 +87,16 @@ export class UserPasswordIncorrectError extends Error {
         this.code = 'USER_PASSWORD_INCORRECT'
     }
 }
+
+export class UserNotAuthorizedError extends Error {
+    name: string;
+    message: string;
+    code: string;
+
+    constructor(message: string) {
+        super(message);
+
+        this.name = 'UserNotAuthorizedError';
+        this.code = 'USER_NOT_AUTHORIZED'
+    }
+}
