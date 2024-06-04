@@ -22,7 +22,7 @@ export default function sendResponse(req: TRequest, res: Response, status: numbe
         }
         return res.status(status).json({
             error: err,
-            message
+            message: message === '' || !message ? error?.message : message
         })
     }
 
@@ -45,5 +45,6 @@ export default function sendResponse(req: TRequest, res: Response, status: numbe
         data,
         page,
         limit,
+        count: data?.length
     })
 }
