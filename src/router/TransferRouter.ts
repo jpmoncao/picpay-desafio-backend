@@ -29,8 +29,10 @@ export default class TransferRouter extends APIRouter {
                 sendResponse(req, res, 401, [], 'Usuário não autorizado!', new UserNotAuthorizedError('Usuário não autorizado!'));
         });
 
-        this._router.get('/user/:id', (req: TRequest, res: Response) => this.controller.index(req, res));
         this._router.get('/:id', (req: TRequest, res: Response) => this.controller.show(req, res));
         this._router.post('/', (req: TRequest, res: Response) => this.controller.store(req, res));
+        this._router.get('/user/:id', (req: TRequest, res: Response) => this.controller.index(req, res));
+        this._router.get('/payer/:id', (req: TRequest, res: Response) => this.controller.index(req, res));
+        this._router.get('/payee/:id', (req: TRequest, res: Response) => this.controller.index(req, res));
     }
 }

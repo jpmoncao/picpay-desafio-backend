@@ -17,8 +17,11 @@ import ListShopkeeperByUserId from "../usecases/ListShopkeeperByUserId.js";
 import ListWalletByUserId from "../usecases/ListWalletByUserId.js";
 import EditWallet from "../usecases/EditWallet.js";
 import CreateTransfer from "../usecases/CreateTransfer.js";
+import ListTransfersByUserId from "../usecases/ListTransfersByUserId.js";
+import ListTransfersByPayerId from "../usecases/ListTransfersByPayerId.js";
+import ListTransfersByPayeeId from "../usecases/ListTransfersByPayeeId.js";
 
-import { UserNotFoundError } from "../errors/User.js";
+import { UserNotAuthorizedError, UserNotFoundError } from "../errors/User.js";
 import { WalletHasInsufficientAmountError, WalletNotFoundError } from "../errors/Wallet.js";
 import { TransferNotFoundError, TransferMissingDataError, TransferShopkeeperPayerError, TransferPayerIsEqualPayeeError, TransferAmountIsInvalidError } from '../errors/Transfer.js';
 
@@ -35,6 +38,38 @@ export default class TransferController extends Controller {
     }
 
     public async index(req: TRequest, res: Response): Promise<Response> {
+        const page = Number(req.query?.page ?? 1);
+        const limit = Number(req.query?.limit ?? 10);
+
+        const id = Number(req.params.id ?? 0);
+
+        if (!id)
+            return sendResponse(req, res, 500, [], '', new TransferMissingDataError('É necessário passar o ID do usuário!'));
+
+        let usecase: (
+            ListTransfersByUserId |
+            ListTransfersByPayerId |
+            ListTransfersByPayeeId |
+            undefined
+        );
+
+        if (req.url.includes('payer'))
+            usecase = new ListTransfersByPayerId(this.repository);
+        if (req.url.includes('payee'))
+            usecase = new ListTransfersByPayeeId(this.repository);
+        else if (req.url.includes('user'))
+            usecase = new ListTransfersByUserId(this.repository);
+
+        if (usecase)
+            return await usecase.execute(id, limit, page)
+                .then(({ data, message }) => {
+                    if (id != req.user?.id_user)
+                        return sendResponse(req, res, 401, [], '', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
+
+                    return sendResponse(req, res, 202, data, message)
+                })
+                .catch(err => sendResponse(req, res, 500, [], err.message ?? '', err));
+
         return response;
     }
 
