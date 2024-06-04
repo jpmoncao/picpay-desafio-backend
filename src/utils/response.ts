@@ -1,5 +1,6 @@
-import { Request, Response } from "express"
-import dotenv from 'dotenv'
+import { TRequest } from "../types/TRequest";
+import { Response } from "express";
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ dotenv.config();
  * @param error Erro para ser retornado (opcional)
  * @returns Retorna json da response
  */
-export default function sendResponse(req: Request, res: Response, status: number, data: any[] | undefined, message: string, error?: any): Response {
+export default function sendResponse(req: TRequest, res: Response, status: number, data: any[] | undefined, message: string, error?: any): Response {
     if (error) {
         const err = {
             "name": error.name,

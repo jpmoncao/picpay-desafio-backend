@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { TRequest } from "../types/TRequest.js";
 import { Knex } from "knex";
 import { verifyToken } from "../utils/auth.js";
 
@@ -14,7 +14,7 @@ export default class UserAuthenticate {
         this.repository = new UserRepositoryImpl(this.trx)
     }
 
-    public async execute(req: Request, token?: string): Promise<boolean> {
+    public async execute(req: TRequest, token?: string): Promise<boolean> {
         const jwToken = token ?? req.headers.authorization?.split('Bearer ')[1];
 
         if (!jwToken)
@@ -24,6 +24,8 @@ export default class UserAuthenticate {
 
         try {
             const userExists = await this.repository.findUserById(user.id_user ?? 0);
+            if (userExists)
+                req.user = userExists;
             return !!userExists;
         } catch (error) {
             console.error("Erro ao verificar usuário:", error);

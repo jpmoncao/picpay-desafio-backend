@@ -1,4 +1,5 @@
-import { Request, Response, response } from "express";
+import { Response, response } from "express";
+import { TRequest } from "../types/TRequest.js";
 import sendResponse from "../utils/response.js";
 import dotenv from 'dotenv';
 
@@ -15,7 +16,7 @@ import ListShopkeeperById from "../usecases/ListShopkeeperByUserId.js";
 import CreateShopkeeper from "../usecases/CreateShopkeeper.js";
 import EditWallet from "../usecases/EditWallet.js";
 
-import { UserNotFoundError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
+import { UserNotFoundError, UserIncorrectPatternError, UserMissingDataError, UserNotAuthorizedError } from "../errors/User.js";
 import { ShopkeeperMissingDataError, ShopkeeperNotFoundError } from '../errors/Shopkeeper.js';
 
 dotenv.config();
@@ -32,7 +33,7 @@ export default class ShopkeeperController extends Controller {
         this.repository = new ShopkeeperRepositoryImpl(this.trx);
     }
 
-    public async index(req: Request, res: Response): Promise<Response> {
+    public async index(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const page = Number(req.query.page ?? 1);
@@ -57,7 +58,7 @@ export default class ShopkeeperController extends Controller {
         return resController;
     }
 
-    public async store(req: Request, res: Response): Promise<Response> {
+    public async store(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         this.trx = await this.initTransition();
@@ -76,7 +77,9 @@ export default class ShopkeeperController extends Controller {
             if (id_user <= 0)
                 id_user = await createUser.execute({ name, email, password, cpf_cnpj, person_type })
                     .then(async ({ data }) => data.id_user)
-                    .catch(err => { throw err });
+                    .catch(err => { throw err })
+            else if (id_user != req.user?.id_user)
+                throw new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!');
 
             const createShopkeeper = new CreateShopkeeper(this.repository);
             return await createShopkeeper.execute({ id_user })
@@ -104,7 +107,7 @@ export default class ShopkeeperController extends Controller {
         }
     }
 
-    public async show(req: Request, res: Response): Promise<Response> {
+    public async show(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const listShopkeeperById = new ListShopkeeperById(this.repository);
@@ -112,15 +115,19 @@ export default class ShopkeeperController extends Controller {
         const id = Number(req.params?.id);
 
         return await listShopkeeperById.execute(id)
-            .then(({ data, message }) => sendResponse(req, res, 202, data, message))
+            .then(({ data, message }) => {
+                if (data?.id_user != req.user?.id_user)
+                    return sendResponse(req, res, 401, [], 'Usuário não autorizado para acessar esses dados!', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
+                return sendResponse(req, res, 202, data, message)
+            })
             .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }
 
-    public async edit(req: Request, res: Response): Promise<Response> {
+    public async edit(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async destroy(req: Request, res: Response): Promise<Response> {
+    public async destroy(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 }

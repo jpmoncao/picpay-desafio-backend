@@ -1,24 +1,25 @@
 import { Knex } from "knex";
-import { Request, Response, response } from "express";
+import { Response, response } from "express";
+import { TRequest } from "../types/TRequest.js";
 import { Repo } from "../database/repos/Repo.js";
 import createConn from '../database/conn.js';
 
 interface IController {
-    index?: (req: Request, res: Response) => Promise<Response>;
-    show?: (req: Request, res: Response) => Promise<Response>;
-    store?: (req: Request, res: Response) => Promise<Response>;
-    edit?: (req: Request, res: Response) => Promise<Response>;
-    destroy?: (req: Request, res: Response) => Promise<Response>;
+    index?: (req: TRequest, res: Response) => Promise<Response>;
+    show?: (req: TRequest, res: Response) => Promise<Response>;
+    store?: (req: TRequest, res: Response) => Promise<Response>;
+    edit?: (req: TRequest, res: Response) => Promise<Response>;
+    destroy?: (req: TRequest, res: Response) => Promise<Response>;
 
     conn: Knex<any, any[]>;
     trx: Knex.Transaction<any, any[]>;
     repository: Repo | undefined;
-    _req: Request;
+    _req: TRequest;
     _res: Response;
 }
 
 export default class Controller implements IController {
-    _req: Request;
+    _req: TRequest;
     _res: Response;
 
     conn: Knex<any, any[]>;
@@ -37,23 +38,23 @@ export default class Controller implements IController {
         return await this.conn.transaction();
     }
 
-    public async index(req: Request, res: Response): Promise<Response> {
+    public async index(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async show(req: Request, res: Response): Promise<Response> {
+    public async show(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async store(req: Request, res: Response): Promise<Response> {
+    public async store(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async edit(req: Request, res: Response): Promise<Response> {
+    public async edit(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async destroy(req: Request, res: Response): Promise<Response> {
+    public async destroy(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 }

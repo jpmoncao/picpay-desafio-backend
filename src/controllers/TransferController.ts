@@ -1,4 +1,5 @@
-import { Request, Response, response } from "express";
+import { Response, response } from "express";
+import { TRequest } from "../types/TRequest.js";
 import sendResponse from "../utils/response.js";
 
 import WalletProps from "../database/domain/wallet.js";
@@ -33,15 +34,15 @@ export default class TransferController extends Controller {
         this.repository = new TransferRepositoryImpl(this.trx);
     }
 
-    public async index(req: Request, res: Response): Promise<Response> {
+    public async index(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async show(req: Request, res: Response): Promise<Response> {
+    public async show(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async store(req: Request, res: Response): Promise<Response> {
+    public async store(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const { id_payer, id_payee, amount } = req.body;
@@ -71,7 +72,7 @@ export default class TransferController extends Controller {
             if (userPayerId === userPayeeId)
                 throw new TransferPayerIsEqualPayeeError('O usuário pagador e recebedor são iguais!');
 
-            const userPayerIsShopkeeper: boolean = await listShopkeeperByUserId.execute(userPayeeId)
+            const userPayerIsShopkeeper: boolean = await listShopkeeperByUserId.execute(userPayerId)
                 .then(({ data }) => data.id_user && data.id_user > 0)
                 .catch(err => false);
 
@@ -141,16 +142,16 @@ export default class TransferController extends Controller {
             TransferPayerIsEqualPayeeError |
             TransferAmountIsInvalidError
         ) {
-            this.trx.rollback();
+            this.trx.rollback(error);
             return sendResponse(req, res, 500, [], error?.message ?? '', error)
         }
     }
 
-    public async edit(req: Request, res: Response): Promise<Response> {
+    public async edit(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 
-    public async destroy(req: Request, res: Response): Promise<Response> {
+    public async destroy(req: TRequest, res: Response): Promise<Response> {
         return response;
     }
 }

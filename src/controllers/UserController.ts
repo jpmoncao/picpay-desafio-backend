@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { TRequest } from "../types/TRequest.js";
 import dotenv from 'dotenv';
 
 import Controller from "./Controller.js";
@@ -16,6 +17,7 @@ import CreateWallet from "../usecases/CreateWallet.js";
 import AuthenticateUser from "../usecases/AuthenticateUser.js";
 
 import sendResponse from "../utils/response.js";
+import { UserMissingDataError, UserNotAuthorizedError } from "../errors/User.js";
 
 dotenv.config();
 
@@ -31,7 +33,7 @@ export default class UserController extends Controller {
         this.repository = new UserRepositoryImpl(this.trx);
     }
 
-    public async index(req: Request, res: Response): Promise<Response> {
+    public async index(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const listUser = new ListUser(this.repository);
@@ -54,7 +56,7 @@ export default class UserController extends Controller {
             .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }
 
-    public async store(req: Request, res: Response): Promise<Response> {
+    public async store(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const walletRepository = new WalletRepositoryImpl(this.trx);
@@ -86,7 +88,7 @@ export default class UserController extends Controller {
             })
     }
 
-    public async edit(req: Request, res: Response): Promise<Response> {
+    public async edit(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const editUser = new EditUser(this.repository);
@@ -96,6 +98,8 @@ export default class UserController extends Controller {
 
         return await editUser.execute({ id_user, name, email, password, cpf_cnpj, person_type })
             .then(({ data, message }) => {
+                if (id_user != req.user?.id_user)
+                    return sendResponse(req, res, 401, [], 'Usuário não autorizado para acessar esses dados!', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
                 const userWithHateoas = {
                     ...data, links: [
                         { rel: 'info', href: process.env.API_ADDRESS + '/user/' + data.id_user, method: 'GET' },
@@ -113,7 +117,7 @@ export default class UserController extends Controller {
             })
     }
 
-    public async destroy(req: Request, res: Response): Promise<Response> {
+    public async destroy(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const deleteUser = new DeleteUser(this.repository);
@@ -132,15 +136,20 @@ export default class UserController extends Controller {
             })
     }
 
-    public async show(req: Request, res: Response): Promise<Response> {
+    public async show(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const listUserById = new ListUserById(this.repository);
 
         const id = Number(req.params?.id);
+        if (!id)
+            return sendResponse(req, res, 404, [], 'O ID não foi encontrado!', new UserMissingDataError('O ID não foi encontrado!'));
 
         return await listUserById.execute(id)
             .then(({ data, message }) => {
+                if (id != req.user?.id_user)
+                    return sendResponse(req, res, 401, [], 'Usuário não autorizado para acessar esses dados!', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
+
                 const userWithHateoas = {
                     ...data, links: [
                         { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + data.id_user, method: 'PUT' },
@@ -153,7 +162,7 @@ export default class UserController extends Controller {
             .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }
 
-    public async login(req: Request, res: Response): Promise<Response> {
+    public async login(req: TRequest, res: Response): Promise<Response> {
         await this.init();
 
         const authenticateUser = new AuthenticateUser(this.repository);

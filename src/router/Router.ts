@@ -1,4 +1,4 @@
-import { Express, Request, Response, Router } from "express";
+import { Router } from "express";
 import Controller from "../controllers/Controller";
 
 export default class APIRouter {
