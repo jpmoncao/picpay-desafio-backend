@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
 import { TRequest } from "../types/TRequest";
 import { Response } from "express";
-import dotenv from 'dotenv';
+
+import { logger } from "./logger.js";
 
 dotenv.config();
 
@@ -20,6 +22,9 @@ export default function sendResponse(req: TRequest, res: Response, status: numbe
             "name": error.name,
             "code": error.code,
         }
+
+        logger.error(message === '' || !message ? error?.message : message);
+
         return res.status(status).json({
             error: err,
             message: message === '' || !message ? error?.message : message
@@ -35,6 +40,8 @@ export default function sendResponse(req: TRequest, res: Response, status: numbe
         limit = 10;
     else if (limit < 0)
         limit = 1;
+
+    logger.log('info', message);
 
     return res.status(status).json({
         _self: {
