@@ -11,13 +11,24 @@ export default class UserRepositoryImpl implements IUserRepo {
     }
 
     public async findUsers(page: number, limit: number): Promise<UserProps[] | undefined> {
-        if (page < 1) page = 1;
-        if (limit < 1) limit = 1;
+        if (page < 1) {
+            page = 1;
+        }
+
+        if (limit < 1) {
+            limit = 10;
+        }
+
+        let offset = (page - 1) * limit;
+        if (page == 1)
+            offset = 0;
+        else if (limit == 1)
+            offset = page - 1;
 
         const users = await this.trx('users')
             .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
-            .limit((limit * page))
-            .offset((limit * page) - limit)
+            .limit(limit)
+            .offset(offset)
             .orderBy('id_user', 'asc');
         return users;
     }

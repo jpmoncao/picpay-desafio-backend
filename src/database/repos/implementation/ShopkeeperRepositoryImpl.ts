@@ -11,13 +11,24 @@ export default class ShopkeeperRepositoryImpl implements IShopkeeperRepo {
     }
 
     public async findShopkeepers(page: number, limit: number): Promise<ShopkeeperProps[] | undefined> {
-        if (page < 1) page = 1;
-        if (limit < 1) limit = 1;
+        if (page < 1) {
+            page = 1;
+        }
+
+        if (limit < 1) {
+            limit = 10;
+        }
+
+        let offset = (page - 1) * limit;
+        if (page == 1)
+            offset = 0;
+        else if (limit == 1)
+            offset = page - 1;
 
         const shopkeepers = await this.trx('shopkeepers')
             .select('shopkeepers.id_shopkeeper', 'users.*')
             .limit(limit)
-            .offset((page - 1) * limit)
+            .offset(offset)
             .orderBy('shopkeepers.id_user', 'asc')
             .innerJoin('users', 'users.id_user', 'shopkeepers.id_user');
         return shopkeepers;

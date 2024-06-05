@@ -3,6 +3,7 @@ import createConn from "../../conn.js";
 import TransferProps from "../../domain/transfer.js";
 import ITransferRepo from "../TransferRepo.js";
 import { maskCpfCnpj } from "../../../utils/mask.js";
+import { logger } from "../../../utils/logger.js";
 
 export default class TransferRepositoryImpl implements ITransferRepo {
     trx: Knex.Transaction<any, any[]>;
@@ -29,14 +30,23 @@ export default class TransferRepositoryImpl implements ITransferRepo {
 
 
     public async findTransferByUserId(userId: number, page: number, limit: number): Promise<any[] | undefined> {
-        if (page < 1)
+        if (page < 1) {
             page = 1;
+        }
 
-        if (limit < 1)
-            limit = 1;
+        if (limit < 1) {
+            limit = 10;
+        }
+
+        let offset = (page - 1) * limit;
+        if (page == 1)
+            offset = 0;
+        else if (limit == 1)
+            offset = page - 1;
 
         const transfers = await this.trx('transfers')
-            .select('transfers.id_transfer',
+            .select(
+                'transfers.id_transfer',
                 'transfers.amount',
                 'transfers.created_at',
                 'transfers.id_payer',
@@ -53,8 +63,8 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             .where('user_payer.id_user', userId)
             .orWhere('user_payee.id_user', userId)
             .orderBy('transfers.created_at', 'asc')
-            .limit((limit * page))
-            .offset((limit * page) - limit);
+            .offset(offset)
+            .limit(limit);
 
         const data = transfers.map(transfer => {
             const payer = {
@@ -62,33 +72,41 @@ export default class TransferRepositoryImpl implements ITransferRepo {
                 name: transfer.name_payer,
                 cpf_cnpj: userId != transfer.id_payer ? maskCpfCnpj(transfer.cpf_cnpj_payer) : transfer.cpf_cnpj_payer,
                 person_type: transfer.person_type_payer,
-            }
+            };
 
             const payee = {
                 id_payee: transfer.id_payee,
                 name: transfer.name_payee,
                 cpf_cnpj: userId != transfer.id_payee ? maskCpfCnpj(transfer.cpf_cnpj_payee) : transfer.cpf_cnpj_payee,
-                person_type: transfer.person_type_payee
-            }
+                person_type: transfer.person_type_payee,
+            };
 
             return {
                 id_transfer: transfer.id_transfer,
                 amount: transfer.amount,
                 created_at: transfer.created_at,
                 payer,
-                payee
-            }
+                payee,
+            };
         });
 
         return data;
     }
 
     public async findTransferByPayerId(userId: number, page: number, limit: number): Promise<TransferProps[] | undefined> {
-        if (page < 1)
+        if (page < 1) {
             page = 1;
+        }
 
-        if (limit < 1)
+        if (limit < 1) {
             limit = 10;
+        }
+
+        let offset = (page - 1) * limit;
+        if (page == 1)
+            offset = 0;
+        else if (limit == 1)
+            offset = page - 1;
 
         const transfers: any[] = await this.trx('transfers')
             .select('transfers.id_transfer',
@@ -107,8 +125,8 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             .innerJoin('users as user_payee', 'user_payee.id_user', 'transfers.id_payee')
             .where('transfers.id_payer', userId)
             .orderBy('transfers.created_at', 'asc')
-            .limit((limit * page))
-            .offset((limit * page) - page);
+            .limit(limit)
+            .offset(offset);
 
         const data = transfers.map(transfer => {
             const payer = {
@@ -138,12 +156,19 @@ export default class TransferRepositoryImpl implements ITransferRepo {
     }
 
     public async findTransferByPayeeId(userId: number, page: number, limit: number): Promise<any[] | undefined> {
-
-        if (page < 1)
+        if (page < 1) {
             page = 1;
+        }
 
-        if (limit < 1)
+        if (limit < 1) {
             limit = 10;
+        }
+
+        let offset = (page - 1) * limit;
+        if (page == 1)
+            offset = 0;
+        else if (limit == 1)
+            offset = page - 1;
 
         const transfers: any[] = await this.trx('transfers')
             .select('transfers.id_transfer',
@@ -162,8 +187,8 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             .innerJoin('users as user_payee', 'user_payee.id_user', 'transfers.id_payee')
             .where('transfers.id_payee', userId)
             .orderBy('transfers.created_at', 'asc')
-            .limit((limit * page))
-            .offset((limit * page) - page);
+            .limit(limit)
+            .offset(offset);
 
         const data = transfers.map(transfer => {
             const payer = {

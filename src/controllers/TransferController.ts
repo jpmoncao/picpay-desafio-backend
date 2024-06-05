@@ -63,14 +63,20 @@ export default class TransferController extends Controller {
             usecase = new ListTransfersByUserId(this.repository);
 
         if (usecase)
-            return await usecase.execute(id, limit, page)
+            return await usecase.execute(id, page, limit)
                 .then(({ data, message }) => {
-                    if (id != req.user?.id_user)
+                    if (id != req.user?.id_user) {
+                        this.trx.commit();
                         return sendResponse(req, res, 401, [], '', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
+                    }
 
-                    return sendResponse(req, res, 202, data, message)
+                    this.trx.commit();
+                    return sendResponse(req, res, 202, data, message);
                 })
-                .catch(err => sendResponse(req, res, 500, [], err.message ?? '', err));
+                .catch(err => {
+                    this.trx.rollback();
+                    return sendResponse(req, res, 500, [], err.message ?? '', err);
+                });
 
         return response;
     }
