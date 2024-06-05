@@ -97,10 +97,10 @@ export default class TransferController extends Controller {
 
             const userPayer: UserProps = await listUserById.execute(id_payer)
                 .then(({ data }) => data)
-                .catch(err => 0);
+                .catch(err => undefined);
             const userPayee: UserProps = await listUserById.execute(id_payee)
                 .then(({ data }) => data)
-                .catch(err => 0);
+                .catch(err => undefined);
 
             if (!userPayer.id_user && (userPayee?.id_user ?? 0) <= 0)
                 throw new UserNotFoundError('O usuário pagador não existe!');
