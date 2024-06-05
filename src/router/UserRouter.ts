@@ -1,9 +1,8 @@
-import { Response, NextFunction } from "express";
+import { Response } from "express";
 import { TRequest } from "../types/TRequest.js";
 import APIRouter from "./Router.js";
 
 import UserController from "../controllers/UserController.js";
-import UserAuthenticate from "../middleware/UserAuthenticate.js";
 
 export default class UserRouter extends APIRouter {
     protected controller: UserController;
@@ -13,13 +12,9 @@ export default class UserRouter extends APIRouter {
         this.controller = new UserController();
     }
 
-    private async userAuthenticateMiddleware(req: TRequest, res: Response, next: NextFunction) {
-        await this.controller.init();
-        const userAuthenticate = new UserAuthenticate(this.controller.trx);
-        return await userAuthenticate.execute(req, res, next);
-    }
-
     protected create(): void {
+        this._router.use(async (req, res, next) => await this.initController(req, res, next));
+
         this._router.get('/login', (req: TRequest, res: Response) => this.controller.login(req, res));
         this._router.post('/', (req: TRequest, res: Response) => this.controller.store(req, res));
 

@@ -3,6 +3,7 @@ import { Response, response } from "express";
 import { TRequest } from "../types/TRequest.js";
 import { Repo } from "../database/repos/Repo.js";
 import createConn from '../database/conn.js';
+import { logger } from "../utils/logger.js";
 
 interface IController {
     index?: (req: TRequest, res: Response) => Promise<Response>;
@@ -30,12 +31,16 @@ export default class Controller implements IController {
         this.conn = createConn();
     }
 
-    public async init() {
-        this.trx = await this.initTransition();
+    public async initTransaction(): Promise<void> {
+        this.trx = await this.conn.transaction();
+        logger.log('verbose', 'Transação criada com sucesso!');
     }
 
-    protected async initTransition(): Promise<Knex.Transaction<any, any[]>> {
-        return await this.conn.transaction();
+    public async endTransaction(): Promise<void> {
+        if (!this.trx.isCompleted() && this.trx.isTransaction) {
+            this.trx.commit();
+            logger.log('verbose', 'Controller fechou a transação!');
+        }
     }
 
     public async index(req: TRequest, res: Response): Promise<Response> {

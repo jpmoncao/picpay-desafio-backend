@@ -1,9 +1,8 @@
-import { NextFunction, Response } from "express";
+import { Response } from "express";
 import { TRequest } from "../types/TRequest.js";
 import APIRouter from "./Router.js";
 
 import ShopkeeperController from "../controllers/ShopkeeperController.js";
-import UserAuthenticate from "../middleware/UserAuthenticate.js";
 
 export default class ShopkeeperRouter extends APIRouter {
     constructor() {
@@ -12,13 +11,9 @@ export default class ShopkeeperRouter extends APIRouter {
         this.controller = new ShopkeeperController();
     }
 
-    private async userAuthenticateMiddleware(req: TRequest, res: Response, next: NextFunction) {
-        await this.controller.init();
-        const userAuthenticate = new UserAuthenticate(this.controller.trx);
-        return await userAuthenticate.execute(req, res, next)
-    }
-
     protected create(): void {
+        this._router.use(async (req, res, next) => await this.initController(req, res, next));
+
         this._router.post('/', (req: TRequest, res: Response) => this.controller.store(req, res));
 
         this._router.use(async (req, res, next) => await this.userAuthenticateMiddleware(req, res, next));

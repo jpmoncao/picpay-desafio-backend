@@ -27,6 +27,7 @@ import { UserNotAuthorizedError, UserNotFoundError } from "../errors/User.js";
 import { WalletHasInsufficientAmountError, WalletNotFoundError } from "../errors/Wallet.js";
 import { TransferNotFoundError, TransferMissingDataError, TransferShopkeeperPayerError, TransferPayerIsEqualPayeeError, TransferAmountIsInvalidError } from '../errors/Transfer.js';
 import handleHATEOAS from "../utils/hateoas.js";
+import { logger } from "../utils/logger.js";
 
 export default class TransferController extends Controller {
     repository: ITransferRepo;
@@ -95,6 +96,11 @@ export default class TransferController extends Controller {
                 })
                 .catch(err => sendResponse(req, res, 500, [], err.message ?? '', err));
 
+        if (!this.trx.isCompleted()) {
+            logger.info('Transação completed? | completed: ' + this.trx.isCompleted() + ' | trx: ' + this.trx.name)
+            this.trx.commit();
+            logger.info('Transação completed! | completed: ' + this.trx.isCompleted() + ' | trx: ' + this.trx.name)
+        }
         return handleRes;
     }
 

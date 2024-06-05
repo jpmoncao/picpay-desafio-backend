@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -16,17 +16,20 @@
             align-items: center;
         }
 
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px 0;
+        }
+
         #extrato {
             background: #ffffff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            margin: 20px 0;
             padding: 20px;
-            width: 80%;
-            max-width: 600px;
             min-height: 30vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
         }
 
@@ -34,7 +37,7 @@
             list-style-type: none;
             padding: 0;
             margin: 0;
-            width: 90%;
+            width: 100%;
         }
 
         #extrato li {
@@ -53,10 +56,9 @@
 
         #paginacao {
             display: flex;
-            justify-content: space-between;
-            width: 80%;
-            max-width: 600px;
-            margin-bottom: 20px;
+            justify-content: center;
+            gap: 2rem;
+            width: 50%;
         }
 
         #paginacao button {
@@ -82,45 +84,40 @@
 </head>
 
 <body>
-    <div id="extrato">
+    <div class="container" id="extrato">
         <ul>
             <li>Loading...</li>
         </ul>
     </div>
-    <div id="paginacao">
-        <button id="first" onclick="first()">First</button>
-        <button id="prev" onclick="prev()" disabled>Prev</button>
-        <button id="next" onclick="next()" disabled>Next</button>
-        <button id="last" onclick="last()">Last</button>
+    <div class="container" id="paginacao">
+        <button type="button" id="first" onclick="navigate('first')">First</button>
+        <button type="button" id="prev" onclick="navigate('prev')" disabled>Prev</button>
+        <button type="button" id="current" disabled>Current</button>
+        <button type="button" id="next" onclick="navigate('next')" disabled>Next</button>
+        <button type="button" id="last" onclick="navigate('last')">Last</button>
     </div>
     <script>
-        const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxLCJuYW1lIjoiSm_Do28gUGVkcm8iLCJjcGZfY25waiI6IjQ4NzExMzk5ODA1IiwicGVyc29uX3R5cGUiOiJGIiwiZW1haWwiOiJwZWRyb2hqb2FvNDRAZW1haWwuY29tIiwiaWF0IjoxNzE3NTIxMTYzfQ.kGy1Xgsi_VJ3FrVxA5L3JkAIQbkQrTr0c2GMnYw5Jz8';
+        const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxLCJuYW1lIjoiSm_Do28gUGVkcm8iLCJjcGZfY25waiI6IjQ4NzExMzk5ODA1IiwicGVyc29uX3R5cGUiOiJGIiwiZW1haWwiOiJqb2FvcGVkcm9AYXNjb250c2lzdGVtYXMuY29tLmJyIiwiaWF0IjoxNzE3NjE1MTY3fQ.kDRB_tqTUC2scn5mG1F4yp4EjUzfjEM4Jd0vqqy5Cp0';
 
         let page = 1;
-        let limit = 5;
+        const limit = 5;
         let links = {};
         let totalPages = 0;
 
-        async function fetchData(url, limit, page) {
-            console.log(url)
-            console.log(limit, page)
-
-            if (!limit) limit = 10;
-            if (!page) page = 1;
-
+        async function fetchData(url) {
             document.querySelector('#extrato ul').innerHTML = '<li>Loading...</li>';
 
-            await fetch(url, {
-                headers: {
-                    'authorization': token
-                }
-            }).then(async response => {
-                if (!response.ok)
-                    throw new Error('Network response was not ok');
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
 
-                const linksHeader = await response.headers.get('X-Pagination');
-                const totalPagesHeader = response.headers.get('X-Pagination-Pages');
-                totalPages = Number(totalPagesHeader);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const linksHeader = response.headers.get('X-Pagination');
+                totalPages = Number(response.headers.get('X-Pagination-Pages'));
                 links = JSON.parse(linksHeader);
 
                 const res = await response.json();
@@ -134,42 +131,40 @@
                     document.querySelector('#extrato ul').innerHTML = '<li>No data available</li>';
                 }
 
-                createPagination(totalPages);
-            }).catch(error => {
+                updatePagination();
+            } catch (error) {
                 console.warn(error);
                 document.querySelector('#extrato ul').innerHTML = '<li>Error loading data</li>';
-            });
+            }
         }
 
-        function prev() {
-            page -= 1;
-            fetchData(links.filter(link => link.rel === 'prev')[0].href, limit, page);
+        function navigate(direction) {
+            const link = links.find(link => link.rel === direction);
+            if (link) {
+                page = new URL(link.href).searchParams.get('page');
+                fetchData(link.href);
+            }
         }
 
-        function first() {
-            page = 1;
-            fetchData(links.filter(link => link.rel === 'first')[0].href, limit, page);
+        function updatePagination() {
+            document.getElementById('first').disabled = !links.find(link => link.rel === 'first') || page == 1;
+            document.getElementById('prev').disabled = !links.find(link => link.rel === 'prev') || page == 1;
+            document.getElementById('next').disabled = !links.find(link => link.rel === 'next') || page == totalPages;
+            document.getElementById('last').disabled = !links.find(link => link.rel === 'last') || page == totalPages;
+
+            document.getElementById('prev').style.display = Number(page) - 1 >= 1 ? 'block' : 'none';
+            document.getElementById('next').style.display = Number(page) + 1 <= totalPages ? 'block' : 'none';
+            document.getElementById('first').style.display = document.getElementById('prev').style.display;
+            document.getElementById('last').style.display = document.getElementById('next').style.display;
+
+            document.getElementById('first').innerHTML = 'First';
+            document.getElementById('prev').innerHTML = Number(page) - 1 >= 1 ? Number(page) - 1 : 1;
+            document.getElementById('current').innerHTML = Number(page);
+            document.getElementById('next').innerHTML = Number(page) + 1 ? Number(page) + 1 : totalPages;
+            document.getElementById('last').innerHTML = 'Last';
         }
 
-        function last() {
-            page = totalPages;
-            fetchData(links.filter(link => link.rel === 'last')[0].href, limit, page);
-        }
-
-        function next() {
-            page += 1;
-            fetchData(links.filter(link => link.rel === 'next')[0].href, limit, page);
-        }
-
-        function createPagination(totalPages) {
-            console.log(totalPages)
-            document.querySelector('#first').disabled = page == 1;
-            document.querySelector('#last').disabled = page == totalPages;
-            document.querySelector('#prev').disabled = links.filter(link => link.rel == 'prev').length == 0;
-            document.querySelector('#next').disabled = links.filter(link => link.rel == 'next').length == 0;
-        }
-
-        fetchData(`http://localhost:3000/transfers/user/1?limit=${limit}&page=${page}`, limit, page);
+        fetchData(`http://localhost:3000/transfers/user/1?limit=${limit}&page=${page}`);
     </script>
 </body>
 
