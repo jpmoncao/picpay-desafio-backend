@@ -1,9 +1,12 @@
 import { TRequest } from "../types/TRequest.js";
+import { Response, NextFunction } from "express";
 import { Knex } from "knex";
 import { verifyToken } from "../utils/auth.js";
 
 import UserRepositoryImpl from "../database/repos/implementation/UserRepositoryImpl.js";
 import UserProps from "../database/domain/user.js";
+import { UserNotAuthorizedError } from "../errors/User.js";
+import sendResponse from "../utils/response.js";
 
 export default class UserAuthenticate {
     repository: UserRepositoryImpl;
@@ -14,22 +17,20 @@ export default class UserAuthenticate {
         this.repository = new UserRepositoryImpl(this.trx)
     }
 
-    public async execute(req: TRequest, token?: string): Promise<boolean> {
-        const jwToken = token ?? req.headers.authorization?.split('Bearer ')[1];
-
-        if (!jwToken)
-            return false;
-
-        const user: UserProps = verifyToken(jwToken ?? '');
-
+    public async execute(req: TRequest, res: Response, next: NextFunction, token?: string): Promise<void> {
         try {
+            const jwToken = token ?? req.headers.authorization?.split('Bearer ')[1];
+            if (!jwToken) throw new UserNotAuthorizedError('Usuário não autorizado!');
+
+            const user: UserProps = verifyToken(jwToken ?? '');
+
             const userExists = await this.repository.findUserById(user.id_user ?? 0);
-            if (userExists)
-                req.user = userExists;
-            return !!userExists;
+            if (!userExists) throw new UserNotAuthorizedError('Usuário não autorizado!');
+
+            req.user = userExists;
+            next();
         } catch (error) {
-            console.error("Erro ao verificar usuário:", error);
-            return false;
+            sendResponse(req, res, 403, [], 'Usuário não autorizado', error);
         }
     }
 }
