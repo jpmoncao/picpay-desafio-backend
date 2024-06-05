@@ -18,6 +18,7 @@ import AuthenticateUser from "../usecases/AuthenticateUser.js";
 
 import sendResponse from "../utils/response.js";
 import { UserMissingDataError, UserNotAuthorizedError } from "../errors/User.js";
+import handleHATEOAS from "../utils/hateoas.js";
 
 dotenv.config();
 
@@ -37,10 +38,31 @@ export default class UserController extends Controller {
         await this.init();
 
         const listUser = new ListUser(this.repository);
-        const { page, limit } = req.query;
+        const page = Number(req.query.page ?? 10);
+        const limit = Number(req.query.limit ?? 10);
 
-        return await listUser.execute(Number(page ?? 1), Number(limit ?? 10))
+        return await listUser.execute(page, limit)
             .then(({ data, message }) => {
+                // Obtém o total de páginas e remove o primeiro indice (total)
+                const totalPages = Math.ceil(data[0].total / limit);
+                data.shift()
+
+                // Coloca todos as direções possíveis da paginação em um array
+                let linksHATEOAS = [
+                    { rel: 'first', route: `?page=1&limit=${limit}` },
+                    { rel: 'last', route: `?page=${totalPages}&limit=${limit}` }
+                ];
+                if (page > 1)
+                    linksHATEOAS.push({ rel: 'prev', route: `?page=${Math.max(page - 1, 1)}&limit=${limit}` });
+                if (page != totalPages)
+                    linksHATEOAS.push({ rel: 'next', route: `?page=${Math.min(page + 1, totalPages)}&limit=${limit}` });
+
+                // Gera o HATEOAS de paginação
+                const hateoas = handleHATEOAS(`${process.env.API_ADDRESS}${req.baseUrl}`, linksHATEOAS);
+
+                // Seta o cabeçalho de paginação
+                res.set('X-Pagination', JSON.stringify(hateoas));
+
                 const userWithHateoas = data.map((user: UserProps) => {
                     return {
                         ...user, links: [

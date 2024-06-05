@@ -30,7 +30,13 @@ export default class UserRepositoryImpl implements IUserRepo {
             .limit(limit)
             .offset(offset)
             .orderBy('id_user', 'asc');
-        return users;
+
+        const totalItems: { total: number } = await this.trx
+            .countDistinct({ total: 'users.id_user' })
+            .from('users')
+            .first();
+
+        return [{ total: totalItems.total }, ...users];
     }
 
     public async findUserById(userId: number): Promise<UserProps | undefined> {

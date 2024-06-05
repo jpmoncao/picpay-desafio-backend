@@ -26,6 +26,7 @@ import SendMailToTransfer from "../usecases/SendMailToTransfer.js";
 import { UserNotAuthorizedError, UserNotFoundError } from "../errors/User.js";
 import { WalletHasInsufficientAmountError, WalletNotFoundError } from "../errors/Wallet.js";
 import { TransferNotFoundError, TransferMissingDataError, TransferShopkeeperPayerError, TransferPayerIsEqualPayeeError, TransferAmountIsInvalidError } from '../errors/Transfer.js';
+import handleHATEOAS from "../utils/hateoas.js";
 
 export default class TransferController extends Controller {
     repository: ITransferRepo;
@@ -57,29 +58,45 @@ export default class TransferController extends Controller {
 
         if (req.url.includes('payer'))
             usecase = new ListTransfersByPayerId(this.repository);
-        if (req.url.includes('payee'))
+        else if (req.url.includes('payee'))
             usecase = new ListTransfersByPayeeId(this.repository);
         else if (req.url.includes('user'))
             usecase = new ListTransfersByUserId(this.repository);
 
+        let handleRes: Response = res;
         if (usecase)
-            return await usecase.execute(id, page, limit)
+            handleRes = await usecase.execute(id, page, limit)
                 .then(({ data, message }) => {
-                    if (id != req.user?.id_user) {
-                        this.trx.commit();
+                    if (id != req.user?.id_user)
                         return sendResponse(req, res, 401, [], '', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
-                    }
 
-                    this.trx.commit();
+                    // Obtém o total de páginas e remove o primeiro indice (total)
+                    const totalPages = Math.ceil(data[0].total / limit);
+                    data.shift()
+
+                    // Coloca todos as direções possíveis da paginação em um array
+                    let linksHATEOAS = [
+                        { rel: 'first', route: `?page=1&limit=${limit}` },
+                        { rel: 'last', route: `?page=${totalPages}&limit=${limit}` }
+                    ];
+                    if (page > 1)
+                        linksHATEOAS.push({ rel: 'prev', route: `?page=${Math.max(page - 1, 1)}&limit=${limit}` });
+                    if (page != totalPages)
+                        linksHATEOAS.push({ rel: 'next', route: `?page=${Math.min(page + 1, totalPages)}&limit=${limit}` });
+
+                    // Gera o HATEOAS de paginação
+                    const hateoas = handleHATEOAS(`${process.env.API_ADDRESS}${req.baseUrl}/user/${id}`, linksHATEOAS);
+
+                    // Seta o cabeçalho de paginação
+                    res.set('X-Pagination', JSON.stringify(hateoas));
+
                     return sendResponse(req, res, 202, data, message);
                 })
-                .catch(err => {
-                    this.trx.rollback();
-                    return sendResponse(req, res, 500, [], err.message ?? '', err);
-                });
+                .catch(err => sendResponse(req, res, 500, [], err.message ?? '', err));
 
-        return response;
+        return handleRes;
     }
+
 
     public async show(req: TRequest, res: Response): Promise<Response> {
         return response;

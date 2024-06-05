@@ -4,4 +4,5 @@ export default interface TransferProps {
     id_payee?: number | null | undefined;
     amount?: number | null | undefined;
     created_at?: string | null;
+    total?: number;
 }

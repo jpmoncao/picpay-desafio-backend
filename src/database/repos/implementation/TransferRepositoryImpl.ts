@@ -29,7 +29,7 @@ export default class TransferRepositoryImpl implements ITransferRepo {
     }
 
 
-    public async findTransferByUserId(userId: number, page: number, limit: number): Promise<any[] | undefined> {
+    public async findTransferByUserId(userId: number, page: number, limit: number): Promise<TransferProps[] | undefined> {
         if (page < 1) {
             page = 1;
         }
@@ -66,6 +66,15 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             .offset(offset)
             .limit(limit);
 
+        const totalItems: { total: number } = await this.trx
+            .countDistinct({ total: 'transfers.id_transfer' })
+            .from('transfers')
+            .innerJoin('users as user_payer', 'user_payer.id_user', 'transfers.id_payer')
+            .innerJoin('users as user_payee', 'user_payee.id_user', 'transfers.id_payee')
+            .where('user_payer.id_user', userId)
+            .orWhere('user_payee.id_user', userId)
+            .first();
+
         const data = transfers.map(transfer => {
             const payer = {
                 id_payer: transfer.id_payer,
@@ -90,7 +99,7 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             };
         });
 
-        return data;
+        return [{ total: totalItems.total }, ...data];
     }
 
     public async findTransferByPayerId(userId: number, page: number, limit: number): Promise<TransferProps[] | undefined> {
@@ -128,6 +137,14 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             .limit(limit)
             .offset(offset);
 
+        const totalItems: { total: number } = await this.trx
+            .countDistinct({ total: 'transfers.id_transfer' })
+            .from('transfers')
+            .innerJoin('users as user_payer', 'user_payer.id_user', 'transfers.id_payer')
+            .innerJoin('users as user_payee', 'user_payee.id_user', 'transfers.id_payee')
+            .where('transfers.id_payer', userId)
+            .first();
+
         const data = transfers.map(transfer => {
             const payer = {
                 id_payer: transfer.id_payer,
@@ -152,10 +169,10 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             }
         });
 
-        return data;
+        return [{ total: totalItems.total }, ...data];
     }
 
-    public async findTransferByPayeeId(userId: number, page: number, limit: number): Promise<any[] | undefined> {
+    public async findTransferByPayeeId(userId: number, page: number, limit: number): Promise<TransferProps[] | undefined> {
         if (page < 1) {
             page = 1;
         }
@@ -190,6 +207,14 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             .limit(limit)
             .offset(offset);
 
+        const totalItems: { total: number } = await this.trx
+            .countDistinct({ total: 'transfers.id_transfer' })
+            .from('transfers')
+            .innerJoin('users as user_payer', 'user_payer.id_user', 'transfers.id_payer')
+            .innerJoin('users as user_payee', 'user_payee.id_user', 'transfers.id_payee')
+            .where('transfers.id_payee', userId)
+            .first();
+
         const data = transfers.map(transfer => {
             const payer = {
                 id_payer: transfer.id_payer,
@@ -214,7 +239,7 @@ export default class TransferRepositoryImpl implements ITransferRepo {
             }
         });
 
-        return data;
+        return [{ total: totalItems.total }, ...data];
     }
 
     public async createTransfer(props: TransferProps): Promise<TransferProps | undefined> {

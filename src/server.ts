@@ -10,7 +10,7 @@ import TransferRouter from './router/TransferRouter.js';
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cors({ exposedHeaders: ['X-Pagination'] }));
 app.use(express.json());
 
 app.use('/users', new UserRouter().router);

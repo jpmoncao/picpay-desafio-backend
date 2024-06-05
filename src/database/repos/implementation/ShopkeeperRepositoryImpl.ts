@@ -31,7 +31,14 @@ export default class ShopkeeperRepositoryImpl implements IShopkeeperRepo {
             .offset(offset)
             .orderBy('shopkeepers.id_user', 'asc')
             .innerJoin('users', 'users.id_user', 'shopkeepers.id_user');
-        return shopkeepers;
+
+        const totalItems: { total: number } = await this.trx
+            .countDistinct({ total: 'shopkeepers.id_shopkeeper' })
+            .from('shopkeepers')
+            .first();
+
+
+        return [{ total: totalItems.total }, ...shopkeepers];
     }
 
     public async findShopkeeperByUserId(userId: number): Promise<ShopkeeperProps | undefined> {

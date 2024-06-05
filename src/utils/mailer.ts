@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { logger } from "./logger.js";
 
 dotenv.config();
 
@@ -23,5 +24,5 @@ export default async function sendMail(emailTo: string, html: string = '<b>Hello
         html: html,
     });
 
-    console.log("Email enviado: " + info.messageId + ' | <' + new Date() + '>');
+    logger.info("Email enviado: " + info.messageId + ' | <' + new Date() + '>');
 }
