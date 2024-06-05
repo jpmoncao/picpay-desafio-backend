@@ -89,6 +89,7 @@ export default class TransferController extends Controller {
 
                     // Seta o cabeçalho de paginação
                     res.set('X-Pagination', JSON.stringify(hateoas));
+                    res.set('X-Pagination-Pages', totalPages.toString());
 
                     return sendResponse(req, res, 202, data, message);
                 })

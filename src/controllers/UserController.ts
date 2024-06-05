@@ -62,6 +62,7 @@ export default class UserController extends Controller {
 
                 // Seta o cabeçalho de paginação
                 res.set('X-Pagination', JSON.stringify(hateoas));
+                res.set('X-Pagination-Pages', totalPages.toString());
 
                 const userWithHateoas = data.map((user: UserProps) => {
                     return {

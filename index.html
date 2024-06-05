@@ -88,22 +88,29 @@
         </ul>
     </div>
     <div id="paginacao">
-        <button id="prev" onclick="prev()">Prev</button>
-        <button id="next" onclick="next()">Next</button>
+        <button id="first" onclick="first()">First</button>
+        <button id="prev" onclick="prev()" disabled>Prev</button>
+        <button id="next" onclick="next()" disabled>Next</button>
+        <button id="last" onclick="last()">Last</button>
     </div>
     <script>
         const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxLCJuYW1lIjoiSm_Do28gUGVkcm8iLCJjcGZfY25waiI6IjQ4NzExMzk5ODA1IiwicGVyc29uX3R5cGUiOiJGIiwiZW1haWwiOiJwZWRyb2hqb2FvNDRAZW1haWwuY29tIiwiaWF0IjoxNzE3NTIxMTYzfQ.kGy1Xgsi_VJ3FrVxA5L3JkAIQbkQrTr0c2GMnYw5Jz8';
 
         let page = 1;
         let limit = 5;
+        let links = {};
+        let totalPages = 0;
 
-        async function fetchData(limit, page) {
+        async function fetchData(url, limit, page) {
+            console.log(url)
+            console.log(limit, page)
+
             if (!limit) limit = 10;
             if (!page) page = 1;
 
             document.querySelector('#extrato ul').innerHTML = '<li>Loading...</li>';
 
-            await fetch(`http://localhost:3000/transfers/user/1?limit=${limit}&page=${page}`, {
+            await fetch(url, {
                 headers: {
                     'authorization': token
                 }
@@ -112,7 +119,9 @@
                     throw new Error('Network response was not ok');
 
                 const linksHeader = await response.headers.get('X-Pagination');
-                const links = JSON.parse(linksHeader);
+                const totalPagesHeader = response.headers.get('X-Pagination-Pages');
+                totalPages = Number(totalPagesHeader);
+                links = JSON.parse(linksHeader);
 
                 const res = await response.json();
 
@@ -125,10 +134,7 @@
                     document.querySelector('#extrato ul').innerHTML = '<li>No data available</li>';
                 }
 
-                totalPages = Math.ceil(res.count / limit);
-
-                document.querySelector('#next').disabled = links.filter(link => link.rel == 'next').length == 0;
-                document.querySelector('#prev').disabled = links.filter(link => link.rel == 'prev').length == 0;
+                createPagination(totalPages);
             }).catch(error => {
                 console.warn(error);
                 document.querySelector('#extrato ul').innerHTML = '<li>Error loading data</li>';
@@ -137,15 +143,33 @@
 
         function prev() {
             page -= 1;
-            fetchData(limit, page);
+            fetchData(links.filter(link => link.rel === 'prev')[0].href, limit, page);
+        }
+
+        function first() {
+            page = 1;
+            fetchData(links.filter(link => link.rel === 'first')[0].href, limit, page);
+        }
+
+        function last() {
+            page = totalPages;
+            fetchData(links.filter(link => link.rel === 'last')[0].href, limit, page);
         }
 
         function next() {
             page += 1;
-            fetchData(limit, page);
+            fetchData(links.filter(link => link.rel === 'next')[0].href, limit, page);
         }
 
-        fetchData(limit, page);
+        function createPagination(totalPages) {
+            console.log(totalPages)
+            document.querySelector('#first').disabled = page == 1;
+            document.querySelector('#last').disabled = page == totalPages;
+            document.querySelector('#prev').disabled = links.filter(link => link.rel == 'prev').length == 0;
+            document.querySelector('#next').disabled = links.filter(link => link.rel == 'next').length == 0;
+        }
+
+        fetchData(`http://localhost:3000/transfers/user/1?limit=${limit}&page=${page}`, limit, page);
     </script>
 </body>
 

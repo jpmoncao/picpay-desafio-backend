@@ -63,6 +63,7 @@ export default class ShopkeeperController extends Controller {
 
                 // Seta o cabeçalho de paginação
                 res.set('X-Pagination', JSON.stringify(hateoas));
+                res.set('X-Pagination-Pages', totalPages.toString());
 
                 const shopkeeperWithHateoas = data.map((user: ShopkeeperProps) => {
                     return {
