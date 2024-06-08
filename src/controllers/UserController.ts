@@ -29,14 +29,11 @@ export default class UserController extends Controller {
         super();
     }
 
-    public async init() {
-        this.trx = await this.initTransition();
+    public initRepository() {
         this.repository = new UserRepositoryImpl(this.trx);
     }
 
     public async index(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const listUser = new ListUser(this.repository);
         const page = Number(req.query.page ?? 10);
         const limit = Number(req.query.limit ?? 10);
@@ -80,8 +77,6 @@ export default class UserController extends Controller {
     }
 
     public async store(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const walletRepository = new WalletRepositoryImpl(this.trx);
 
         const createUser = new CreateUser(this.repository);
@@ -112,8 +107,6 @@ export default class UserController extends Controller {
     }
 
     public async edit(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const editUser = new EditUser(this.repository);
 
         const id_user = Number(req.params.id);
@@ -141,8 +134,6 @@ export default class UserController extends Controller {
     }
 
     public async destroy(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const deleteUser = new DeleteUser(this.repository);
 
         const id = Number(req.params.id);
@@ -160,8 +151,6 @@ export default class UserController extends Controller {
     }
 
     public async show(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const listUserById = new ListUserById(this.repository);
 
         const id = Number(req.params?.id);
@@ -186,8 +175,6 @@ export default class UserController extends Controller {
     }
 
     public async login(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const authenticateUser = new AuthenticateUser(this.repository);
         const { email, password } = req.body;
 

@@ -21,11 +21,6 @@ export default class APIRouter {
         return this._router;
     }
 
-    protected async initController(req: TRequest, res: Response, next: NextFunction): Promise<void> {
-        await this.controller.initTransaction();
-        next();
-    }
-
     protected async userAuthenticateMiddleware(req: TRequest, res: Response, next: NextFunction) {
         const userAuthenticate = new UserAuthenticate(this.controller.trx);
         return await userAuthenticate.execute(req, res, next)

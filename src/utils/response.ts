@@ -26,6 +26,8 @@ export default function sendResponse(req: TRequest, res: Response, status: numbe
         };
 
         logger.error(message === '' || !message ? error.message : message);
+        if (!req.trx?.isCompleted())
+            req.trx?.rollback();
 
         return res.status(status).json({
             error: err,
@@ -44,6 +46,8 @@ export default function sendResponse(req: TRequest, res: Response, status: numbe
         limit = 1;
 
     logger.log('info', message);
+    if (!req.trx?.isCompleted())
+        req.trx?.commit();
 
     return res.status(status).json({
         _self: {

@@ -29,14 +29,11 @@ export default class ShopkeeperController extends Controller {
         super();
     }
 
-    public async init() {
-        this.trx = await this.initTransition();
+    public initRepository() {
         this.repository = new ShopkeeperRepositoryImpl(this.trx);
     }
 
     public async index(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const page = Number(req.query.page ?? 10);
         const limit = Number(req.query.limit ?? 10);
 
@@ -81,9 +78,6 @@ export default class ShopkeeperController extends Controller {
     }
 
     public async store(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
-        this.trx = await this.initTransition();
         this.repository = new ShopkeeperRepositoryImpl(this.trx);
 
         const userRepository = new UserRepositoryImpl(this.trx);
@@ -127,8 +121,6 @@ export default class ShopkeeperController extends Controller {
     }
 
     public async show(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const listShopkeeperById = new ListShopkeeperById(this.repository);
 
         const id = Number(req.params?.id);

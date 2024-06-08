@@ -36,8 +36,7 @@ export default class TransferController extends Controller {
         super();
     }
 
-    public async init() {
-        this.trx = await this.initTransition();
+    public initRepository() {
         this.repository = new TransferRepositoryImpl(this.trx);
     }
 
@@ -110,8 +109,6 @@ export default class TransferController extends Controller {
     }
 
     public async store(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const { id_payer, id_payee, amount } = req.body;
         const amountValue = Number(amount ?? 0);
 

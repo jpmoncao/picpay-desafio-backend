@@ -19,8 +19,7 @@ export default class WalletController extends Controller {
         super();
     }
 
-    public async init() {
-        this.trx = await this.initTransition();
+    public initRepository() {
         this.repository = new WalletRepositoryImpl(this.trx);
     }
 
@@ -29,8 +28,6 @@ export default class WalletController extends Controller {
     }
 
     public async show(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const id_wallet = Number(req.params.id) ?? 0;
         const id_user = Number(req.params.id_user) ?? 0;
 
@@ -73,8 +70,6 @@ export default class WalletController extends Controller {
     }
 
     public async edit(req: TRequest, res: Response): Promise<Response> {
-        await this.init();
-
         const id_wallet: number | undefined = Number(req.params.id) ?? 0;
         const id_user: number | undefined = Number(req.params.id_user) ?? 0;
         const balance: number | undefined = parseFloat(req.body.balance) ?? undefined;

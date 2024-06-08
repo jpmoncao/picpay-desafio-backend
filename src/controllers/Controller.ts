@@ -4,6 +4,7 @@ import { TRequest } from "../types/TRequest.js";
 import { Repo } from "../database/repos/Repo.js";
 import createConn from '../database/conn.js';
 import { logger } from "../utils/logger.js";
+import { NextFunction } from "express-serve-static-core";
 
 interface IController {
     index?: (req: TRequest, res: Response) => Promise<Response>;
@@ -31,13 +32,22 @@ export default class Controller implements IController {
         this.conn = createConn();
     }
 
-    public async initTransaction(): Promise<void> {
+    public initRepository() {
+
+    }
+
+    public async initTransaction(req: TRequest, res: Response, next: NextFunction): Promise<void> {
         this.trx = await this.conn.transaction();
+        req.trx = this.trx;
         logger.log('verbose', 'Transação criada com sucesso!');
+
+        this.initRepository();
+
+        next();
     }
 
     public async endTransaction(): Promise<void> {
-        if (!this.trx.isCompleted() && this.trx.isTransaction) {
+        if (!this.trx.isCompleted()) {
             this.trx.commit();
             logger.log('verbose', 'Controller fechou a transação!');
         }

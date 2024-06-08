@@ -14,5 +14,6 @@ export const logger = winston.createLogger({
     transports: [
         new winston.transports.File({ filename: __dirname + "/../../logs/error.log", level: "warn" }),
         new winston.transports.File({ filename: __dirname + "/../../logs/app.log" }),
+        new winston.transports.File({ filename: __dirname + "/../../logs/verbose.log", level: "verbose" }),
     ],
 });
