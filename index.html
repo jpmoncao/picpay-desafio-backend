@@ -43,9 +43,30 @@
         #extrato li {
             background: #f9f9f9;
             margin: 8px 0;
-            padding: 10px;
+            padding: 6px 10px;
             border-radius: 4px;
             border: 1px solid #ddd;
+        }
+
+        #extrato li * {
+            padding: 4px 0px;
+            margin: 0;
+        }
+
+        #extrato li .tipo {
+            color: #333;
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            width: min-content;
+        }
+
+        #extrato li.payer .tipo {
+            background-color: #dd7171;
+        }
+
+        #extrato li.payee .tipo {
+            background-color: #71dd71;
         }
 
         #extrato h2 {
@@ -100,9 +121,10 @@
         const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxLCJuYW1lIjoiSm_Do28gUGVkcm8iLCJjcGZfY25waiI6IjQ4NzExMzk5ODA1IiwicGVyc29uX3R5cGUiOiJGIiwiZW1haWwiOiJqb2FvcGVkcm9AYXNjb250c2lzdGVtYXMuY29tLmJyIiwiaWF0IjoxNzE3NjE1MTY3fQ.kDRB_tqTUC2scn5mG1F4yp4EjUzfjEM4Jd0vqqy5Cp0';
 
         let page = 1;
-        const limit = 5;
+        const limit = 4;
         let links = {};
         let totalPages = 0;
+        let id_user = 1;
 
         async function fetchData(url) {
             document.querySelector('#extrato ul').innerHTML = '<li>Loading...</li>';
@@ -125,7 +147,7 @@
                 if (res.data && res.data.length > 0) {
                     document.querySelector('#extrato ul').innerHTML = '';
                     res.data.forEach(d => {
-                        document.querySelector('#extrato ul').innerHTML += `<li>${d.id_transfer} - R\$${d.amount}</li>`;
+                        document.querySelector('#extrato ul').innerHTML += itemList(d);
                     });
                 } else {
                     document.querySelector('#extrato ul').innerHTML = '<li>No data available</li>';
@@ -164,7 +186,21 @@
             document.getElementById('last').innerHTML = 'Last';
         }
 
-        fetchData(`http://localhost:3000/transfers/user/1?limit=${limit}&page=${page}`);
+        function itemList(transfer) {
+            console.log(transfer)
+            console.log(transfer.payer.id_user)
+            console.log(id_user)
+            return `
+                <li class="${transfer.payer.id_payer == id_user ? 'payer' : 'payee'}">
+                    <legend class="tipo">${transfer.payer.id_payer == id_user ? 'Saída' : 'Entrada'}</legend>   
+                    <p><strong>Transferência ${transfer.payer.id_payer == id_user ? 'efetuada' : 'recebida'}</strong></p>   
+                    <p>Valor: R\$${transfer.amount.toLocaleString('pt-br', { minimumFractionDigits: 2 }).replace('.', ',')}</p>
+                    <p>${transfer.payer.id_payer == id_user ? 'Para' : 'De'}: ${transfer.payer.id_payer == id_user ? transfer.payer.name : transfer.payee.name}</p>
+                </li>
+            `;
+        }
+
+        fetchData(`http://localhost:3000/transfers/user/${id_user}?limit=${limit}&page=${page}`);
     </script>
 </body>
 
