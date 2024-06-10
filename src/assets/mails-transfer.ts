@@ -26,7 +26,7 @@ export const mailTransferPayer = (payer: IUserMail, payee: IUserMail, amount: nu
         </p>
         <hr />
         <p style="padding: 0.5rem 5rem;">
-            <strong>Valor: </strong> R\$${(0.00).toLocaleString('pt-br', {
+            <strong>Valor: </strong> R\$${(amount).toLocaleString('pt-br', {
     minimumFractionDigits: 2
 })}
         </p>
@@ -35,7 +35,7 @@ export const mailTransferPayer = (payer: IUserMail, payee: IUserMail, amount: nu
 
 </html>
 `;
-export const mailTransferPayee = `
+export const mailTransferPayee = (payer: IUserMail, payee: IUserMail, amount: number, isPayer: boolean = true) => `
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -45,18 +45,18 @@ export const mailTransferPayee = `
         <h1>Transferência efetuada </h1>
     </header>
     <main>
-        <p style="padding: 0.5rem 5rem;">
-            <strong>Pagador: ${'John Doe'} </strong><br />
-            <strong><em>CPF / CNPJ:${'123.456.789-01'} </em></strong>
+            <p style="padding: 0.5rem 5rem;">
+            <strong>Pagador: ${payer.name} </strong><br />
+            <strong><em>CPF / CNPJ:${isPayer ? payer.cpf_cnpj : maskCpfCnpj(payer.cpf_cnpj)} </em></strong>
         </p>
         <hr />
         <p style="padding: 0.5rem 5rem;">
-            <strong>Recebente: ${'John Doe'} </strong><br />
-            <strong><em>CPF / CNPJ:${'123.456.789-01'} </em></strong>
+            <strong>Recebente: ${payee.name} </strong><br />
+            <strong><em>CPF / CNPJ:${isPayer ? maskCpfCnpj(payee.cpf_cnpj) : payee.cpf_cnpj} </em></strong>
         </p>
         <hr />
         <p style="padding: 0.5rem 5rem;">
-            <strong>Valor: </strong> R\$${(0.00).toLocaleString('pt-br', {
+            <strong>Valor: </strong> R\$${(amount).toLocaleString('pt-br', {
     minimumFractionDigits: 2
 })}
         </p>

@@ -14,11 +14,6 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-console.log({
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS,
-})
-
 export default async function sendMail(emailTo: string, html: string = '<b>Hello world?</b>') {
     const info = await transporter.sendMail({
         from: '"Simulador de banco 🖖" <no-reply@simulabanco.email>',

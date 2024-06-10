@@ -20,7 +20,7 @@ export default class SendMailToTransfer {
                 { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
                 { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
                 transferProps.amount));
-            await sendMail(payeeProps.email ?? '', mailTransferPayer(
+            await sendMail(payeeProps.email ?? '', mailTransferPayee(
                 { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
                 { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
                 transferProps.amount, false));
