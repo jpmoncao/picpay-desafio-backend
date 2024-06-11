@@ -15,6 +15,7 @@ export default class UserRouter extends APIRouter {
     protected create(): void {
         this._router.use(async (req, res, next) => await this.controller.initTransaction(req, res, next));
 
+        this._router.get('/register/:id', (req: TRequest, res: Response) => this.controller.register(req, res));
         this._router.get('/login', (req: TRequest, res: Response) => this.controller.login(req, res));
         this._router.post('/', (req: TRequest, res: Response) => this.controller.store(req, res));
 

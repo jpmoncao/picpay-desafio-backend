@@ -16,14 +16,21 @@ export default class SendMailToTransfer {
             }
 
 
-            await sendMail(payerProps.email ?? '', mailTransferPayer(
-                { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
-                { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
-                transferProps.amount));
-            await sendMail(payeeProps.email ?? '', mailTransferPayee(
-                { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
-                { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
-                transferProps.amount, false));
+            await sendMail(payerProps.email ?? '',
+                "Uma transferência foi efetuada com sucesso!",
+                mailTransferPayer(
+                    { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
+                    { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
+                    transferProps.amount)
+            );
+            await sendMail(payeeProps.email ?? '',
+                "Uma transferência foi recebida!",
+                mailTransferPayee(
+                    { name: payerProps.name ?? '', cpf_cnpj: payerProps.cpf_cnpj ?? '' },
+                    { name: payeeProps.name ?? '', cpf_cnpj: payeeProps.cpf_cnpj ?? '' },
+                    transferProps.amount,
+                    false)
+            );
 
             return {
                 data: [],

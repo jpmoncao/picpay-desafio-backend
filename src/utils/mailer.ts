@@ -14,12 +14,12 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-export default async function sendMail(emailTo: string, html: string = '<b>Hello world?</b>') {
+export default async function sendMail(emailTo: string, subject: string, html: string = '<b>Hello world?</b>', text?: string) {
     const info = await transporter.sendMail({
         from: '"Simulador de banco 🖖" <no-reply@simulabanco.email>',
         to: emailTo,
-        subject: "Uma transferência foi efetuada com sucesso!",
-        text: "{{ISSO É UMA TRANSAÇÃO FICTÍCIA}}",
+        subject,
+        text,
         html: html,
     });
 

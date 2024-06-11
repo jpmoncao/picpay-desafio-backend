@@ -1,5 +1,4 @@
 import { Knex } from "knex";
-import createConn from "../../conn.js";
 import UserProps from "../../domain/user.js";
 import IUserRepo from "../UserRepo.js";
 
@@ -41,7 +40,7 @@ export default class UserRepositoryImpl implements IUserRepo {
 
     public async findUserById(userId: number): Promise<UserProps | undefined> {
         const user: UserProps[] = await this.trx('users')
-            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email')
+            .select('id_user', 'name', 'cpf_cnpj', 'person_type', 'email', 'token_2fa')
             .where('id_user', userId);
         return user[0];
     }
@@ -62,7 +61,7 @@ export default class UserRepositoryImpl implements IUserRepo {
 
     public async findUserByEmail(email: string): Promise<UserProps | undefined> {
         const user: UserProps[] = await this.trx('users')
-            .select('id_user', 'email', 'password')
+            .select('id_user', 'email', 'password', 'token_2fa')
             .where('email', email);
         return user[0];
     }

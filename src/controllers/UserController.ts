@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Response, response } from "express";
 import { TRequest } from "../types/TRequest.js";
 import dotenv from 'dotenv';
 
@@ -15,10 +15,14 @@ import EditUser from "../usecases/EditUser.js";
 import DeleteUser from "../usecases/DeleteUser.js";
 import CreateWallet from "../usecases/CreateWallet.js";
 import AuthenticateUser from "../usecases/AuthenticateUser.js";
+import SendRegisterMail from "../usecases/SendRegisterMail.js";
+
+import { UserMissingDataError, UserNotAuthorizedError } from "../errors/User.js";
 
 import sendResponse from "../utils/response.js";
-import { UserMissingDataError, UserNotAuthorizedError } from "../errors/User.js";
 import handleHATEOAS from "../utils/hateoas.js";
+import { generate2FAHash } from "../utils/2fa.js";
+import RegisterUser from "../usecases/RegisterUser.js";
 
 dotenv.config();
 
@@ -40,6 +44,8 @@ export default class UserController extends Controller {
 
         return await listUser.execute(page, limit)
             .then(({ data, message }) => {
+                delete data['token_2fa'];
+
                 // Obtém o total de páginas e remove o primeiro indice (total)
                 const totalPages = Math.ceil(data[0].total / limit);
                 data.shift()
@@ -86,6 +92,7 @@ export default class UserController extends Controller {
 
         return await createUser.execute({ id_user, name, email, password, cpf_cnpj, person_type })
             .then(async ({ data, message }) => {
+                delete data['token_2fa'];
                 const userWithHateoas = {
                     ...data, links: [
                         { rel: 'info', href: process.env.API_ADDRESS + '/user/' + data.id_user, method: 'GET' },
@@ -96,6 +103,7 @@ export default class UserController extends Controller {
                 }
 
                 await createWallet.execute({ id_user: data.id_user });
+                await new SendRegisterMail().execute(data);
 
                 this.trx.commit();
                 return sendResponse(req, res, 202, userWithHateoas, message)
@@ -162,6 +170,8 @@ export default class UserController extends Controller {
                 if (id != req.user?.id_user)
                     return sendResponse(req, res, 401, [], 'Usuário não autorizado para acessar esses dados!', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
 
+                delete data['token_2fa'];
+
                 const userWithHateoas = {
                     ...data, links: [
                         { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + data.id_user, method: 'PUT' },
@@ -180,6 +190,8 @@ export default class UserController extends Controller {
 
         return await authenticateUser.execute({ email, password })
             .then(({ data, message }) => {
+                delete data['token_2fa'];
+
                 const userWithHateoas = {
                     ...data, links: [
                         { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + data.id_user, method: 'PUT' },
@@ -192,4 +204,13 @@ export default class UserController extends Controller {
             .catch(err => sendResponse(req, res, 500, [], err.message, err))
     }
 
+    public async register(req: TRequest, res: Response): Promise<Response> {
+        const code = req.query.code as string;
+        const id_user = Number(req.params.id);
+
+        const registerUser = new RegisterUser(this.repository);
+        return await registerUser.execute(id_user, code)
+            .then(({ data, message }) => sendResponse(req, res, 202, [], message))
+            .catch(err => sendResponse(req, res, 500, [], err.message, err))
+    }
 }

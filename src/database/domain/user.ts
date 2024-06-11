@@ -6,6 +6,7 @@ export default interface UserProps {
     password?: string;
     person_type?: string;
     created_at?: string | null;
+    token_2fa?: string | null;
     total?: number;
     [key: string]: any;
 }

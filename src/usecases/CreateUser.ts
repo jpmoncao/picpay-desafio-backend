@@ -5,6 +5,7 @@ import { validarCPF, validarCNPJ } from "../utils/validate.js";
 
 import { UserDuplicateCNPJError, UserDuplicateCPFError, UserDuplicateEmailError, UserIncorrectPatternError, UserMissingDataError } from "../errors/User.js";
 import { encrypt } from "../utils/hash.js";
+import { generate2FAHash } from "../utils/2fa.js";
 
 export default class CreateUser {
     repository: IUserRepo;
@@ -46,13 +47,14 @@ export default class CreateUser {
             throw new UserIncorrectPatternError(`O CPF não é válido!`);
 
         const passwordHash = encrypt(password);
+        const token_2fa = generate2FAHash();
 
-        const userId = await this.repository.createUser({ name, email, password: passwordHash, cpf_cnpj, person_type });
+        const userId = await this.repository.createUser({ name, email, password: passwordHash, cpf_cnpj, person_type, token_2fa });
         const data = await this.repository.findUserById(Number(userId));
 
         return {
             data,
-            message: 'Usuários criado com sucesso!'
+            message: 'Usuários criado com sucesso! Verifique seu e-mail para confirmar o registro...'
         };
     }
 }

@@ -100,3 +100,16 @@ export class UserNotAuthorizedError extends Error {
         this.code = 'USER_NOT_AUTHORIZED'
     }
 }
+
+export class UserNotRegisterError extends Error {
+    name: string;
+    message: string;
+    code: string;
+
+    constructor(message: string) {
+        super(message);
+
+        this.name = 'UserNotRegisterError';
+        this.code = 'USER_UNREGISTER'
+    }
+}
