@@ -92,13 +92,15 @@ export default class UserController extends Controller {
 
         return await createUser.execute({ id_user, name, email, password, cpf_cnpj, person_type })
             .then(async ({ data, message }) => {
-                delete data['token_2fa'];
+                const userData = { ...data };
+                delete userData['token_2fa'];
+
                 const userWithHateoas = {
-                    ...data, links: [
-                        { rel: 'info', href: process.env.API_ADDRESS + '/user/' + data.id_user, method: 'GET' },
-                        { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + data.id_user, method: 'PUT' },
-                        { rel: 'delete', href: process.env.API_ADDRESS + '/user/delete/' + data.id_user, method: 'DELETE' },
-                        { rel: 'wallet', href: process.env.API_ADDRESS + '/wallet/user/' + data.id_user, method: 'GET' },
+                    ...userData, links: [
+                        { rel: 'info', href: process.env.API_ADDRESS + '/user/' + userData.id_user, method: 'GET' },
+                        { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + userData.id_user, method: 'PUT' },
+                        { rel: 'delete', href: process.env.API_ADDRESS + '/user/delete/' + userData.id_user, method: 'DELETE' },
+                        { rel: 'wallet', href: process.env.API_ADDRESS + '/wallet/user/' + userData.id_user, method: 'GET' },
                     ]
                 }
 

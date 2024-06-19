@@ -26,7 +26,7 @@ export default class AuthenticateUser {
             .then(({ data }) => data)
             .catch(err => undefined);
 
-        if (userOwnerEmail.token_2fa.trim() !== '')
+        if (userOwnerEmail?.token_2fa && userOwnerEmail?.token_2fa.trim() !== '')
             throw new UserPasswordIncorrectError('O usuário ainda não foi registrado!')
 
         if (!userOwnerEmail)

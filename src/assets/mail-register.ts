@@ -2,14 +2,13 @@ import dotenv from 'dotenv';
 import { decrypt } from '../utils/hash.js';
 
 interface IUserMail {
-    name: string
-    id_user: number
-    hash: string
+    name: string;
+    url: string;
 }
 
 dotenv.config();
 
-export const mailRegisterUser = ({ name, id_user, hash }: IUserMail) => `
+export const mailRegisterUser = ({ name, url }: IUserMail) => `
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -20,7 +19,7 @@ export const mailRegisterUser = ({ name, id_user, hash }: IUserMail) => `
     </header>
     <main style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
         <p style="padding: 0.5rem 0;">Para concluir seu registro em nossa plataforma é necessário autenticar seu cadastro clicando no <strong>botão abaixo!</strong></p>
-        <a href="${process.env.REGISTER_HREF ?? '' + id_user + '?code="' + decrypt(hash) + '"'}" style="background-color: rebeccapurple; padding: 1rem 3rem; color: white;">Confirmar cadastro</a>
+        <a href="${url}" style="background-color: rebeccapurple; padding: 1rem 3rem; color: white;">Confirmar cadastro</a>
     </main>
     <hr />
 </body>
