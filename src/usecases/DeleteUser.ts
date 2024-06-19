@@ -12,16 +12,16 @@ export default class CreateUser {
     }
 
     async execute(props: UserProps): Promise<UseCase> {
-        const { id, name, username, password } = props;
+        const { id_user, name, username, password } = props;
 
-        if (!id || id == 0)
+        if (!id_user || id_user == 0)
             throw new UserMissingDataError('O id do usuário não foi encontrado!');
 
-        const userHasFound = await this.repository.findUserById(id);
+        const userHasFound = await this.repository.findUserById(id_user);
         if (!userHasFound)
-            throw new UserNotFoundError(`O id '${id}' não pertence a nenhum usuário!`);
+            throw new UserNotFoundError(`O id '${id_user}' não pertence a nenhum usuário!`);
 
-        await this.repository.deleteUserById({ id, name, username, password });
+        await this.repository.deleteUserById({ id_user, name, username, password });
 
         return {
             data: [],

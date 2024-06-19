@@ -20,7 +20,6 @@ export default class ShopkeeperRouter extends APIRouter {
 
         this._router.post('/:id', (req: TRequest, res: Response) => this.controller.store(req, res));
         this._router.get('/', (req: TRequest, res: Response) => this.controller.index(req, res));
-        this._router.get('/:id', (req: TRequest, res: Response) => this.controller.show(req, res));
-        this._router.put('/edit/:id', (req: TRequest, res: Response) => this.controller.edit(req, res));
+        this._router.get('/user/:id', (req: TRequest, res: Response) => this.controller.show(req, res));
     }
 }

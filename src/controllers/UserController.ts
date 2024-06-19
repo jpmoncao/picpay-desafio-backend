@@ -117,39 +117,16 @@ export default class UserController extends Controller {
     }
 
     public async edit(req: TRequest, res: Response): Promise<Response> {
-        const editUser = new EditUser(this.repository);
-
-        const id_user = Number(req.params.id);
-        const { name, email, password, cpf_cnpj, person_type } = req.body;
-
-        return await editUser.execute({ id_user, name, email, password, cpf_cnpj, person_type })
-            .then(({ data, message }) => {
-                if (id_user != req.user?.id_user)
-                    return sendResponse(req, res, 401, [], 'Usuário não autorizado para acessar esses dados!', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
-                const userWithHateoas = {
-                    ...data, links: [
-                        { rel: 'info', href: process.env.API_ADDRESS + '/user/' + data.id_user, method: 'GET' },
-                        { rel: 'edit', href: process.env.API_ADDRESS + '/user/edit/' + data.id_user, method: 'PUT' },
-                        { rel: 'delete', href: process.env.API_ADDRESS + '/user/delete/' + data.id_user, method: 'DELETE' },
-                    ]
-                }
-
-                this.trx.commit();
-                return sendResponse(req, res, 202, userWithHateoas, message)
-            })
-            .catch(err => {
-                this.trx.rollback();
-                return sendResponse(req, res, 500, [], err.message, err)
-            })
+        return response;
     }
 
     public async destroy(req: TRequest, res: Response): Promise<Response> {
         const deleteUser = new DeleteUser(this.repository);
 
-        const id = Number(req.params.id);
+        const id_user = Number(req.params.id);
         const { name, username, password } = req.body;
 
-        return await deleteUser.execute({ id, name, username, password })
+        return await deleteUser.execute({ id_user, name, username, password })
             .then(({ data, message }) => {
                 this.trx.commit();
                 return sendResponse(req, res, 202, data, message);

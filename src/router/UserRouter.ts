@@ -23,7 +23,6 @@ export default class UserRouter extends APIRouter {
 
         this._router.get('/', (req: TRequest, res: Response) => this.controller.index(req, res));
         this._router.get('/:id', (req: TRequest, res: Response) => this.controller.show(req, res));
-        this._router.put('/edit/:id', (req: TRequest, res: Response) => this.controller.edit(req, res));
         this._router.delete('/delete/:id', (req: TRequest, res: Response) => this.controller.destroy(req, res));
     }
 }

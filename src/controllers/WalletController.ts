@@ -70,42 +70,7 @@ export default class WalletController extends Controller {
     }
 
     public async edit(req: TRequest, res: Response): Promise<Response> {
-        const id_wallet: number | undefined = Number(req.params.id) ?? 0;
-        const id_user: number | undefined = Number(req.params.id_user) ?? 0;
-        const balance: number | undefined = parseFloat(req.body.balance) ?? undefined;
-
-        const editWallet = new EditWallet(this.repository);
-
-        if (id_wallet > 0)
-            return await editWallet.execute({ id_user, id_wallet, balance })
-                .then(({ data, message }) => {
-                    if (id_user != req.user?.id_user) {
-                        this.trx.rollback();
-                        return sendResponse(req, res, 401, [], 'Usuário não autorizado para acessar esses dados!', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
-                    }
-
-                    this.trx.commit();
-                    return sendResponse(req, res, 202, data, message);
-                })
-                .catch(err => {
-                    this.trx.rollback();
-                    return sendResponse(req, res, 500, [], err.message, err);
-                });
-        else
-            return await editWallet.execute({ id_user, id_wallet, balance })
-                .then(({ data, message }) => {
-                    if (id_user != req.user?.id_user) {
-                        this.trx.rollback();
-                        return sendResponse(req, res, 401, [], 'Usuário não autorizado para acessar esses dados!', new UserNotAuthorizedError('Usuário não autorizado para acessar esses dados!'));
-                    }
-
-                    this.trx.commit();
-                    return sendResponse(req, res, 202, data, message);
-                })
-                .catch(err => {
-                    this.trx.rollback();
-                    return sendResponse(req, res, 500, [], err.message, err);
-                });
+        return response;
     }
 
     public async destroy(req: TRequest, res: Response): Promise<Response> {
